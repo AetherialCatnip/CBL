@@ -12,68 +12,22 @@
       text-align: center;
       padding-top: 30px;
     }
-    #dosbox {
+    .dosbox-container {
       width: 640px;
       height: 400px;
       margin: auto;
       border: 2px solid #555;
       box-shadow: 0 0 10px #444;
-      position: relative;
-    }
-    canvas {
-      width: 100%;
-      height: 100%;
-    }
-    #status {
-      margin-top: 10px;
-      color: #aaa;
     }
   </style>
 </head>
 <body>
   <h1>CBL - Classic DOS Learning</h1>
   <p id="status">Loading the Byrd experience...</p>
-  <div id="dosbox">
-    <canvas id="jsdos-canvas" width="640" height="400"></canvas>
-  </div>
+  
+  <!-- Don't create a canvas, let js-dos do it -->
+  <div id="dosbox" class="dosbox-container"></div>
 
   <script>
-    // Wait for DOM to be fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      // Define status update function
-      function updateStatus(message) {
-        document.getElementById('status').textContent = message;
-        console.log(message);
-      }
-
-      try {
-        // Get the canvas element
-        const canvas = document.getElementById('jsdos-canvas');
-        if (!canvas) {
-          throw new Error("Canvas element not found");
-        }
-
-        // Initialize js-dos
-        updateStatus("Initializing js-dos...");
-        
-        // Create a DosBox instance
-        const dosbox = new Dos(canvas);
-        
-        // Load the ZIP file
-        updateStatus("Loading CBL.zip...");
-        dosbox.run("CBL.zip", function(ci, options) {
-          updateStatus("Running START.bat...");
-          ci.shell(["START.bat"]);
-        }).catch(function(error) {
-          updateStatus("Error: " + error);
-          console.error("DOS error:", error);
-        });
-        
-      } catch (error) {
-        updateStatus("Fatal error: " + error.message);
-        console.error("Fatal error:", error);
-      }
-    });
-  </script>
-</body>
-</html>
+    // Simple approach with js-dos 6.22
+    var dosbox = document.getElementById("dosbox");
