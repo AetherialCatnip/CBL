@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>CBL - Classic DOS Learning</title>
-  <script src="https://js-dos.com/6.22/current/js-dos.js"></script>
+  <!-- Using js-dos 7.x instead of 6.22 -->
+  <script src="https://js-dos.com/cdn/js-dos.js"></script>
   <style>
     body {
       background-color: #111;
@@ -12,7 +13,7 @@
       text-align: center;
       padding-top: 30px;
     }
-    .dosbox-container {
+    #dosbox {
       width: 640px;
       height: 400px;
       margin: auto;
@@ -24,31 +25,26 @@
 <body>
   <h1>CBL - Classic DOS Learning</h1>
   <p id="status">Loading the Byrd experience...</p>
-  
-  <!-- Don't create a canvas, let js-dos do it -->
-  <div id="dosbox" class="dosbox-container"></div>
+  <div id="dosbox"></div>
 
   <script>
-    // Simple approach with js-dos 6.22
-    var dosbox = document.getElementById("dosbox");
+    // Set the path prefix for js-dos resources
+    emulators.pathPrefix = "https://js-dos.com/cdn/";
     
-    // Let js-dos create the canvas
-    var dos = Dos(dosbox, { 
-      wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js" 
-    });
-    
-    // Use the older API style
-    dos.ready(function(fs, main) {
-      document.getElementById("status").textContent = "Extracting CBL.zip...";
-      
-      fs.extract("CBL.zip").then(function() {
+    // Initialize the DOS emulator
+    Dos(document.getElementById("dosbox"))
+      .then((ci) => {
+        document.getElementById("status").textContent = "Loading CBL.zip...";
+        return ci.mount("CBL.zip");
+      })
+      .then((fs) => {
         document.getElementById("status").textContent = "Running START.bat...";
-        main(["-c", "START.bat"]);
-      }).catch(function(err) {
+        return fs.drive_c.run("START.bat");
+      })
+      .catch((err) => {
         document.getElementById("status").textContent = "Error: " + err;
         console.error(err);
       });
-    });
   </script>
 </body>
 </html>
