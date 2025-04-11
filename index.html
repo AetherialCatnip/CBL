@@ -27,12 +27,21 @@
   <div id="dosbox"></div>
 
   <script>
-    Dos(document.getElementById("dosbox"), {
-      wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js",
-    }).run("CBL.zip", {
-      mount: true,
-      command: "START.BAT"
-    });
+    async function startDos() {
+      const dosbox = document.getElementById("dosbox");
+      try {
+        const ci = await Dos(dosbox, {
+          wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js"
+        });
+        await ci.mount("CBL.zip");
+        await ci.run("START.bat");
+      } catch (error) {
+        console.error("DOS emulation error:", error);
+        document.querySelector("p").textContent = "Error loading DOS program: " + error.message;
+      }
+    }
+
+    startDos();
   </script>
 </body>
 </html>
