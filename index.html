@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>CBL - Classic DOS Learning</title>
-  <!-- Using js-dos 7.x instead of 6.22 -->
+  <!-- Using js-dos 7.x which handles canvas differently -->
   <script src="https://js-dos.com/cdn/js-dos.js"></script>
   <style>
     body {
@@ -20,31 +20,60 @@
       border: 2px solid #555;
       box-shadow: 0 0 10px #444;
     }
+    #status {
+      margin-top: 10px;
+      color: #aaa;
+    }
   </style>
 </head>
 <body>
   <h1>CBL - Classic DOS Learning</h1>
   <p id="status">Loading the Byrd experience...</p>
+  
+  <!-- Empty container for js-dos to initialize -->
   <div id="dosbox"></div>
 
   <script>
-    // Set the path prefix for js-dos resources
-    emulators.pathPrefix = "https://js-dos.com/cdn/";
+    // Configure js-dos
+    emulators = {
+      pathPrefix: "https://js-dos.com/cdn/",
+      onLogging: function(message) {
+        console.log(message);
+      }
+    };
     
-    // Initialize the DOS emulator
-    Dos(document.getElementById("dosbox"))
-      .then((ci) => {
-        document.getElementById("status").textContent = "Loading CBL.zip...";
-        return ci.mount("CBL.zip");
-      })
-      .then((fs) => {
-        document.getElementById("status").textContent = "Running START.bat...";
-        return fs.drive_c.run("START.bat");
-      })
-      .catch((err) => {
-        document.getElementById("status").textContent = "Error: " + err;
-        console.error(err);
-      });
+    // Define a function to update status
+    function updateStatus(message) {
+      document.getElementById("status").textContent = message;
+      console.log(message);
+    }
+    
+    // Initialize js-dos with options that avoid direct canvas manipulation
+    DosBox({
+      emulatorFunction: "dosbox",
+      onReady: function(dosbox, options) {
+        updateStatus("DOS environment ready, loading CBL.zip...");
+        
+        // Mount the ZIP file
+        dosbox.mount("CBL.zip", "c")
+          .then(function() {
+            updateStatus("CBL.zip mounted, starting program...");
+            // Change to C: drive and run START.bat
+            return dosbox.shell(["C:", "CD \\", "START.bat"]);
+          })
+          .catch(function(error) {
+            updateStatus("Error: " + error);
+            console.error("Failed to mount or run:", error);
+          });
+      },
+      onExit: function() {
+        updateStatus("DOS program exited");
+      },
+      onError: function(error) {
+        updateStatus("Emulator error: " + error);
+        console.error("Emulator error:", error);
+      }
+    }, "dosbox");
   </script>
 </body>
 </html>
