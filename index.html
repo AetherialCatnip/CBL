@@ -2,129 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CBL - Canvas Test</title>
+  <title>DOSBox 0.74 in js-box</title>
+  <script src="https://js-dos.com/6.22/current/js-dos.js"></script>
   <style>
-    body {
-      background-color: #111;
-      color: #fff;
-      font-family: monospace;
-      text-align: center;
-      padding-top: 30px;
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    #container {
+    #dosbox {
       width: 640px;
       height: 400px;
-      margin: auto;
-      border: 2px solid #555;
-      box-shadow: 0 0 10px #444;
-    }
-    #status {
-      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <h1>CBL - Canvas Test</h1>
-  <div id="container"></div>
-  <div id="status">Testing canvas functionality...</div>
-  <div id="buttons" style="margin-top: 20px;">
-    <button id="testCanvas">Test Canvas</button>
-    <button id="loadJsDos">Try js-dos</button>
-  </div>
+  <div id="dosbox"></div>
 
   <script>
-    // Test if basic canvas functionality works in this browser
-    document.getElementById('testCanvas').addEventListener('click', function() {
-      const statusEl = document.getElementById('status');
-      const container = document.getElementById('container');
-      
-      // Clear container
-      container.innerHTML = '';
-      
-      try {
-        // Create a canvas element
-        statusEl.textContent = "Creating canvas...";
-        const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 400;
-        container.appendChild(canvas);
-        
-        // Try to get context and draw something
-        statusEl.textContent = "Getting 2D context...";
-        const ctx = canvas.getContext('2d');
-        
-        if (!ctx) {
-          throw new Error("Failed to get 2D context!");
-        }
-        
-        // Draw something to verify it works
-        statusEl.textContent = "Drawing test pattern...";
-        ctx.fillStyle = 'blue';
-        ctx.fillRect(50, 50, 200, 100);
-        ctx.fillStyle = 'red';
-        ctx.fillRect(300, 150, 200, 100);
-        ctx.fillStyle = 'white';
-        ctx.font = '24px monospace';
-        ctx.fillText('Canvas is working!', 200, 300);
-        
-        statusEl.textContent = "Canvas is functioning properly! Try js-dos next.";
-      } catch (error) {
-        statusEl.textContent = "Canvas error: " + error.message;
-        console.error("Canvas error:", error);
-      }
-    });
-
-    // Try loading js-dos with minimal configuration
-    document.getElementById('loadJsDos').addEventListener('click', function() {
-      const statusEl = document.getElementById('status');
-      const container = document.getElementById('container');
-      
-      // Clear container
-      container.innerHTML = '';
-      statusEl.textContent = "Loading js-dos...";
-      
-      try {
-        // Load js-dos script dynamically
-        const script = document.createElement('script');
-        script.src = "https://js-dos.com/cdn/js-dos.js";
-        script.onload = function() {
-          statusEl.textContent = "js-dos loaded, initializing...";
-          
-          try {
-            // Set path prefix for js-dos
-            window.emulators = {
-              pathPrefix: "https://js-dos.com/cdn/"
-            };
-            
-            // Initialize js-dos with minimal options
-            window.Dos(container)
-              .then(function(ci) {
-                statusEl.textContent = "js-dos initialized successfully! Try loading 'digger.zip' sample...";
-                return ci.mount("https://js-dos.com/cdn/digger.zip");
-              })
-              .then(function(fs) {
-                statusEl.textContent = "Sample mounted, running command...";
-                return fs.runCommand("DIGGER.COM");
-              })
-              .catch(function(error) {
-                statusEl.textContent = "js-dos error: " + error;
-                console.error("js-dos error:", error);
-              });
-          } catch (error) {
-            statusEl.textContent = "js-dos initialization error: " + error.message;
-            console.error("js-dos initialization error:", error);
-          }
-        };
-        
-        script.onerror = function() {
-          statusEl.textContent = "Failed to load js-dos script";
-          console.error("Failed to load js-dos script");
-        };
-        
-        document.head.appendChild(script);
-      } catch (error) {
-        statusEl.textContent = "Script loading error: " + error.message;
-        console.error("Script loading error:", error);
+    Dos(document.getElementById("dosbox"), {
+      wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js",
+      onload: (ci) => {
+        ci.mount("cbl", "CBL.zip").then(() => {
+          ci.exec("cbl/STUDENT.EXE");
+        });
       }
     });
   </script>
