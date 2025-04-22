@@ -62,27 +62,23 @@
         <div id="status">Loading emulator...</div>
     </div>
 
+    <script src="https://copy.sh/v86/build/libv86.js"></script>
     <script>
         let emulator;
         let emulatorLoaded = false;
 
-        // Load the v86 library dynamically
-        const script = document.createElement('script');
-        script.src = 'https://copy.sh/v86/build/libv86.js';
-        script.onload = function() {
-            if (typeof V86Starter !== 'undefined') {
+        // Wait for the v86 library to load
+        window.addEventListener('load', function() {
+            // Check if the v86 library is available
+            if (typeof V86Starter === 'function') {
                 document.getElementById('status').textContent = 'Emulator loaded. Click Start Program to begin.';
                 emulatorLoaded = true;
             } else {
                 document.getElementById('status').textContent = 'Error loading emulator.';
                 document.getElementById('status').className = 'error';
+                console.log('V86Starter type:', typeof V86Starter);
             }
-        };
-        script.onerror = function() {
-            document.getElementById('status').textContent = 'Error loading emulator library.';
-            document.getElementById('status').className = 'error';
-        };
-        document.head.appendChild(script);
+        });
 
         // Function to initialize and run v86
         function startProgram() {
@@ -134,6 +130,7 @@
             } catch (error) {
                 document.getElementById('status').textContent = 'Error starting program: ' + error.message;
                 document.getElementById('status').className = 'error';
+                console.error('Error starting program:', error);
             }
         }
 
