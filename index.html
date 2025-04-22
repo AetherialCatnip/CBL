@@ -10,23 +10,24 @@
             margin: 0;
             padding: 20px;
             background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        #dosbox-container {
-            width: 100%;
-            height: 400px;
+        #screen {
             margin: 20px 0;
+            border: 1px solid #ccc;
         }
         .controls {
             margin: 20px 0;
-            text-align: center;
         }
         button {
             padding: 10px 20px;
@@ -43,7 +44,6 @@
         #status {
             margin-top: 10px;
             color: #666;
-            text-align: center;
         }
         .error {
             color: #ff0000;
@@ -53,67 +53,72 @@
 <body>
     <div class="container">
         <h1>CBL Program Runner</h1>
-        <div id="dosbox-container"></div>
+        <div id="screen"></div>
         <div class="controls">
             <button onclick="startProgram()">Start Program</button>
             <button onclick="resetProgram()">Reset</button>
         </div>
-        <div id="status">Loading DOSBox...</div>
+        <div id="status">Loading emulator...</div>
     </div>
 
-    <script src="https://js-dos.com/6.22/current/js-dos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/v86@0.0.1/build/libv86.js"></script>
     <script>
-        let dosbox;
-        let dosboxLoaded = false;
+        let emulator;
+        let emulatorLoaded = false;
 
-        // Initialize js-dos
-        window.onload = function() {
-            try {
-                if (typeof Dos === 'undefined') {
-                    throw new Error('DOSBox library failed to load');
-                }
-                dosboxLoaded = true;
-                document.getElementById('status').textContent = 'DOSBox loaded successfully. Click Start Program to begin.';
-            } catch (error) {
-                document.getElementById('status').textContent = 'Error loading DOSBox: ' + error.message;
-                document.getElementById('status').className = 'error';
-            }
-        };
-
-        async function startProgram() {
-            if (!dosboxLoaded) {
-                document.getElementById('status').textContent = 'DOSBox is still loading. Please wait...';
-                document.getElementById('status').className = 'error';
-                return;
+        // Function to initialize and run v86
+        function startProgram() {
+            if (emulator) {
+                emulator.destroy();
             }
 
-            try {
-                if (dosbox) {
-                    dosbox.destroy();
+            document.getElementById('status').textContent = 'Starting program...';
+
+            emulator = new V86Starter({
+                screen_container: document.getElementById("screen"),
+                bios: {
+                    url: "https://cdn.jsdelivr.net/npm/v86@0.0.1/build/seabios.bin"
+                },
+                vga_bios: {
+                    url: "https://cdn.jsdelivr.net/npm/v86@0.0.1/build/vgabios.bin"
+                },
+                cdrom: {
+                    url: "CBL.zip"
+                },
+                autostart: true,
+                memory_size: 32 * 1024 * 1024,
+                vga_memory_size: 8 * 1024 * 1024,
+                network_relay_url: "wss://relay.widgetry.org/",
+                filesystem: {
+                    basefs: "CBL.zip",
+                    baseurl: "./"
                 }
+            });
 
-                document.getElementById('status').textContent = 'Starting program...';
-                
-                dosbox = await Dos(document.getElementById("dosbox-container"), {
-                    style: "width: 100%; height: 100%;",
-                    wdosboxUrl: "https://js-dos.com/6.22/current/wdosbox.js",
-                    wdosboxWasmUrl: "https://js-dos.com/6.22/current/wdosbox.wasm"
-                });
-
-                await dosbox.run("CBL.zip", "./CBL.zip");
+            emulator.add_listener("emulator-ready", function() {
                 document.getElementById('status').textContent = 'Program started successfully.';
-            } catch (error) {
-                document.getElementById('status').textContent = 'Error starting program: ' + error.message;
+                emulatorLoaded = true;
+            });
+
+            emulator.add_listener("download-progress", function(e) {
+                document.getElementById('status').textContent = 'Loading: ' + Math.round(e.progress * 100) + '%';
+            });
+
+            emulator.add_listener("download-error", function(e) {
+                document.getElementById('status').textContent = 'Error loading program: ' + e;
                 document.getElementById('status').className = 'error';
-            }
+            });
         }
 
         function resetProgram() {
-            if (dosbox) {
-                dosbox.destroy();
+            if (emulator) {
+                emulator.destroy();
                 document.getElementById('status').textContent = 'Program reset. Click Start Program to begin again.';
             }
         }
+
+        // Start the program when the page loads
+        window.onload = startProgram;
     </script>
 </body>
 </html>
