@@ -61,53 +61,75 @@
         <div id="status">Loading emulator...</div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/v86@0.0.1/build/libv86.js"></script>
     <script>
         let emulator;
         let emulatorLoaded = false;
 
+        // Load v86 library
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/v86@0.0.1/build/libv86.js';
+        script.onload = function() {
+            document.getElementById('status').textContent = 'Emulator loaded. Click Start Program to begin.';
+            emulatorLoaded = true;
+        };
+        script.onerror = function() {
+            document.getElementById('status').textContent = 'Error loading emulator.';
+            document.getElementById('status').className = 'error';
+        };
+        document.head.appendChild(script);
+
         // Function to initialize and run v86
         function startProgram() {
+            if (!emulatorLoaded) {
+                document.getElementById('status').textContent = 'Emulator is still loading. Please wait...';
+                document.getElementById('status').className = 'error';
+                return;
+            }
+
             if (emulator) {
                 emulator.destroy();
             }
 
             document.getElementById('status').textContent = 'Starting program...';
 
-            emulator = new V86Starter({
-                screen_container: document.getElementById("screen"),
-                bios: {
-                    url: "https://cdn.jsdelivr.net/npm/v86@0.0.1/build/seabios.bin"
-                },
-                vga_bios: {
-                    url: "https://cdn.jsdelivr.net/npm/v86@0.0.1/build/vgabios.bin"
-                },
-                cdrom: {
-                    url: "CBL.zip"
-                },
-                autostart: true,
-                memory_size: 32 * 1024 * 1024,
-                vga_memory_size: 8 * 1024 * 1024,
-                network_relay_url: "wss://relay.widgetry.org/",
-                filesystem: {
-                    basefs: "CBL.zip",
-                    baseurl: "./"
-                }
-            });
+            try {
+                emulator = new V86Starter({
+                    screen_container: document.getElementById("screen"),
+                    bios: {
+                        url: "https://cdn.jsdelivr.net/npm/v86@0.0.1/build/seabios.bin"
+                    },
+                    vga_bios: {
+                        url: "https://cdn.jsdelivr.net/npm/v86@0.0.1/build/vgabios.bin"
+                    },
+                    cdrom: {
+                        url: "CBL.zip"
+                    },
+                    autostart: true,
+                    memory_size: 32 * 1024 * 1024,
+                    vga_memory_size: 8 * 1024 * 1024,
+                    network_relay_url: "wss://relay.widgetry.org/",
+                    filesystem: {
+                        basefs: "CBL.zip",
+                        baseurl: "./"
+                    }
+                });
 
-            emulator.add_listener("emulator-ready", function() {
-                document.getElementById('status').textContent = 'Program started successfully.';
-                emulatorLoaded = true;
-            });
+                emulator.add_listener("emulator-ready", function() {
+                    document.getElementById('status').textContent = 'Program started successfully.';
+                });
 
-            emulator.add_listener("download-progress", function(e) {
-                document.getElementById('status').textContent = 'Loading: ' + Math.round(e.progress * 100) + '%';
-            });
+                emulator.add_listener("download-progress", function(e) {
+                    document.getElementById('status').textContent = 'Loading: ' + Math.round(e.progress * 100) + '%';
+                });
 
-            emulator.add_listener("download-error", function(e) {
-                document.getElementById('status').textContent = 'Error loading program: ' + e;
+                emulator.add_listener("download-error", function(e) {
+                    document.getElementById('status').textContent = 'Error loading program: ' + e;
+                    document.getElementById('status').className = 'error';
+                });
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error starting program: ' + error.message;
                 document.getElementById('status').className = 'error';
-            });
+            }
         }
 
         function resetProgram() {
@@ -116,9 +138,6 @@
                 document.getElementById('status').textContent = 'Program reset. Click Start Program to begin again.';
             }
         }
-
-        // Start the program when the page loads
-        window.onload = startProgram;
     </script>
 </body>
 </html>
