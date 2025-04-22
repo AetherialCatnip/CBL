@@ -62,22 +62,21 @@
         <div id="status">Loading emulator...</div>
     </div>
 
+    <script src="https://copy.sh/v86/build/libv86.js"></script>
     <script>
         let emulator;
         let emulatorLoaded = false;
 
-        // Load v86 library
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/v86@0.7.0/build/libv86.js';
-        script.onload = function() {
-            document.getElementById('status').textContent = 'Emulator loaded. Click Start Program to begin.';
-            emulatorLoaded = true;
+        // Wait for the v86 library to load
+        window.onload = function() {
+            if (typeof V86Starter !== 'undefined') {
+                document.getElementById('status').textContent = 'Emulator loaded. Click Start Program to begin.';
+                emulatorLoaded = true;
+            } else {
+                document.getElementById('status').textContent = 'Error loading emulator.';
+                document.getElementById('status').className = 'error';
+            }
         };
-        script.onerror = function() {
-            document.getElementById('status').textContent = 'Error loading emulator.';
-            document.getElementById('status').className = 'error';
-        };
-        document.head.appendChild(script);
 
         // Function to initialize and run v86
         function startProgram() {
@@ -97,10 +96,10 @@
                 emulator = new V86Starter({
                     screen_container: document.getElementById("screen"),
                     bios: {
-                        url: "https://cdn.jsdelivr.net/npm/v86@0.7.0/build/seabios.bin"
+                        url: "https://copy.sh/v86/build/seabios.bin"
                     },
                     vga_bios: {
-                        url: "https://cdn.jsdelivr.net/npm/v86@0.7.0/build/vgabios.bin"
+                        url: "https://copy.sh/v86/build/vgabios.bin"
                     },
                     cdrom: {
                         url: "CBL.zip"
@@ -108,7 +107,6 @@
                     autostart: true,
                     memory_size: 32 * 1024 * 1024,
                     vga_memory_size: 8 * 1024 * 1024,
-                    network_relay_url: "wss://relay.widgetry.org/",
                     filesystem: {
                         basefs: "CBL.zip",
                         baseurl: "./"
