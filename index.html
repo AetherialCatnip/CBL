@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
     <title>CBL Program Runner</title>
     <style>
         body {
@@ -67,7 +68,7 @@
 
         // Load v86 library
         const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/v86@0.0.1/build/libv86.js';
+        script.src = 'https://cdn.jsdelivr.net/npm/v86@0.7.0/build/libv86.js';
         script.onload = function() {
             document.getElementById('status').textContent = 'Emulator loaded. Click Start Program to begin.';
             emulatorLoaded = true;
@@ -96,10 +97,10 @@
                 emulator = new V86Starter({
                     screen_container: document.getElementById("screen"),
                     bios: {
-                        url: "https://cdn.jsdelivr.net/npm/v86@0.0.1/build/seabios.bin"
+                        url: "https://cdn.jsdelivr.net/npm/v86@0.7.0/build/seabios.bin"
                     },
                     vga_bios: {
-                        url: "https://cdn.jsdelivr.net/npm/v86@0.0.1/build/vgabios.bin"
+                        url: "https://cdn.jsdelivr.net/npm/v86@0.7.0/build/vgabios.bin"
                     },
                     cdrom: {
                         url: "CBL.zip"
