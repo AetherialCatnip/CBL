@@ -68,15 +68,16 @@
         let emulatorLoaded = false;
 
         // Wait for the v86 library to load
-        window.onload = function() {
-            if (typeof V86Starter !== 'undefined') {
+        window.addEventListener('load', function() {
+            // Check if the v86 library is available
+            if (window.v86) {
                 document.getElementById('status').textContent = 'Emulator loaded. Click Start Program to begin.';
                 emulatorLoaded = true;
             } else {
                 document.getElementById('status').textContent = 'Error loading emulator.';
                 document.getElementById('status').className = 'error';
             }
-        };
+        });
 
         // Function to initialize and run v86
         function startProgram() {
@@ -93,7 +94,7 @@
             document.getElementById('status').textContent = 'Starting program...';
 
             try {
-                emulator = new V86Starter({
+                emulator = new window.v86({
                     screen_container: document.getElementById("screen"),
                     bios: {
                         url: "https://copy.sh/v86/build/seabios.bin"
