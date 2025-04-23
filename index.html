@@ -310,6 +310,7 @@
             // Wait for the Module to be fully loaded
             if (typeof Module !== 'undefined') {
                 debug('Module found, setting up initialization...');
+                
                 // Set up Module ready handler
                 Module.onRuntimeInitialized = function() {
                     debug('Module runtime initialized');
@@ -325,10 +326,15 @@
                     // Add a timeout to check if initialization is stuck
                     setTimeout(function() {
                         if (!Module.ready) {
-                            debug('Warning: Module initialization seems stuck');
-                            console.warn('Module initialization timeout');
+                            debug('Warning: Module initialization seems stuck, attempting to force initialization...');
+                            try {
+                                Module.initRuntime();
+                            } catch (error) {
+                                debug('Error forcing initialization: ' + error);
+                                console.error('Forced initialization error:', error);
+                            }
                         }
-                    }, 5000);
+                    }, 2000);
                 }
             } else {
                 debug('Error: Em-DOSBox module not loaded');

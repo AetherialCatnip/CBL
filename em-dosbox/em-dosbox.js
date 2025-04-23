@@ -66,6 +66,18 @@ var Module = {
             console.log('[Module] Calling ready callback');
             this.onReadyCallback();
         }
+    },
+    // Initialize the runtime
+    initRuntime: function() {
+        console.log('[Module] Initializing runtime...');
+        try {
+            // Simulate runtime initialization
+            this.ready = true;
+            this.onRuntimeInitialized();
+            console.log('[Module] Runtime initialization complete');
+        } catch (error) {
+            console.error('[Module] Runtime initialization error:', error);
+        }
     }
 };
 
@@ -143,4 +155,7 @@ function Dosbox(options) {
 
 // Export the Dosbox constructor
 Module.Dosbox = Dosbox;
-console.log('[Module] Dosbox constructor exported'); 
+console.log('[Module] Dosbox constructor exported');
+
+// Initialize the runtime
+Module.initRuntime(); 
