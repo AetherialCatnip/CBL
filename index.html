@@ -3,129 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBL Project - DOS Emulator</title>
     <link rel="icon" href="data:,">
-    <title>CBL Program Runner</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        :root {
+            --primary-color: #2d2d2d;
+            --secondary-color: #4a4a4a;
+            --accent-color: #0078d4;
+            --text-color: #ffffff;
+            --border-radius: 8px;
+        }
+
+        * {
             margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
         .container {
-            background-color: white;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header {
             text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: var(--secondary-color);
+            border-radius: var(--border-radius);
         }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .emulator-container {
+            background-color: var(--secondary-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
         #dosbox-container {
-            margin: 20px 0;
-            border: 1px solid #ccc;
+            width: 100%;
+            height: 400px;
+            background-color: #000;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            position: relative;
         }
+
         .controls {
-            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
         }
+
         button {
             padding: 10px 20px;
-            margin: 0 5px;
-            background-color: #4CAF50;
+            background-color: var(--accent-color);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
         }
+
         button:hover {
-            background-color: #45a049;
+            background-color: #005a9e;
         }
+
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+
         #status {
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: var(--border-radius);
             margin-top: 10px;
-            color: #666;
         }
-        .error {
-            color: #ff0000;
+
+        .instructions {
+            background-color: var(--secondary-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .instructions h2 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: var(--secondary-color);
+            border-radius: var(--border-radius);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>CBL Program Runner</h1>
-        <div id="dosbox-container"></div>
-        <div class="controls">
-            <button onclick="startProgram()">Start Program</button>
-            <button onclick="resetProgram()">Reset</button>
+        <header>
+            <h1>CBL Project</h1>
+            <p class="description">
+                A web-based DOS emulator running the CBL program. This project uses Em-DOSBox to bring classic DOS applications to modern web browsers.
+            </p>
+        </header>
+
+        <div class="emulator-container">
+            <div id="dosbox-container"></div>
+            <div class="controls">
+                <button id="startButton" onclick="startProgram()">Start Program</button>
+                <button id="resetButton" onclick="resetProgram()">Reset</button>
+            </div>
+            <div id="status">Initializing emulator...</div>
         </div>
-        <div id="status">Loading emulator...</div>
+
+        <div class="instructions">
+            <h2>How to Use</h2>
+            <ul>
+                <li>Click "Start Program" to begin running the CBL program</li>
+                <li>Use the "Reset" button to restart the emulator if needed</li>
+                <li>The program will run in the black box above</li>
+                <li>Keyboard input is supported for interacting with the program</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>Powered by Em-DOSBox | CBL Project</p>
+        </footer>
     </div>
 
     <script src="em-dosbox/em-dosbox.js"></script>
     <script>
-        let emulator;
+        let dosbox;
         let emulatorLoaded = false;
 
-        // Wait for the Em-DOSBox to load
-        window.addEventListener('load', function() {
-            if (typeof Module !== 'undefined') {
-                document.getElementById('status').textContent = 'Emulator loaded. Click Start Program to begin.';
-                emulatorLoaded = true;
-            } else {
-                document.getElementById('status').textContent = 'Error loading emulator.';
-                document.getElementById('status').className = 'error';
-            }
-        });
-
-        // Function to initialize and run Em-DOSBox
-        function startProgram() {
-            if (!emulatorLoaded) {
-                document.getElementById('status').textContent = 'Emulator is still loading. Please wait...';
-                document.getElementById('status').className = 'error';
-                return;
-            }
-
-            if (emulator) {
-                emulator.destroy();
-            }
-
-            document.getElementById('status').textContent = 'Starting program...';
-
+        // Initialize the emulator
+        function initializeEmulator() {
             try {
-                emulator = new Module.Dosbox({
-                    canvas: document.getElementById("dosbox-container"),
-                    autolock: true,
+                const canvas = document.createElement('canvas');
+                document.getElementById('dosbox-container').appendChild(canvas);
+
+                dosbox = new Module.Dosbox({
+                    canvas: canvas,
+                    autolock: false,
                     onready: function() {
-                        document.getElementById('status').textContent = 'Program started successfully.';
+                        document.getElementById('status').textContent = 'Emulator ready';
+                        emulatorLoaded = true;
                     },
                     onerror: function(error) {
                         document.getElementById('status').textContent = 'Error: ' + error;
-                        document.getElementById('status').className = 'error';
+                        console.error('Emulator error:', error);
                     }
                 });
 
-                // Mount the CBL.zip file
-                emulator.fs.mount(emulator.fs.filesystems.ZIP, {
+                // Mount the filesystem
+                dosbox.fs.mount(dosbox.fs.filesystems.ZIP, {
                     zip: 'CBL.zip',
                     mountpoint: '/'
                 });
 
-                // Start the program
-                emulator.run('CBL.EXE');
             } catch (error) {
-                document.getElementById('status').textContent = 'Error starting program: ' + error.message;
-                document.getElementById('status').className = 'error';
-                console.error('Error starting program:', error);
+                document.getElementById('status').textContent = 'Error initializing emulator: ' + error;
+                console.error('Initialization error:', error);
             }
         }
 
-        function resetProgram() {
-            if (emulator) {
-                emulator.destroy();
-                document.getElementById('status').textContent = 'Program reset. Click Start Program to begin again.';
+        // Start the program
+        function startProgram() {
+            if (!emulatorLoaded) {
+                document.getElementById('status').textContent = 'Emulator is still loading. Please wait...';
+                return;
+            }
+
+            try {
+                document.getElementById('status').textContent = 'Starting program...';
+                dosbox.run('CBL.EXE');
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error starting program: ' + error;
+                console.error('Program start error:', error);
             }
         }
+
+        // Reset the program
+        function resetProgram() {
+            if (dosbox) {
+                dosbox.destroy();
+                document.getElementById('dosbox-container').innerHTML = '';
+                emulatorLoaded = false;
+                initializeEmulator();
+            }
+        }
+
+        // Initialize when the page loads
+        window.onload = function() {
+            initializeEmulator();
+        };
     </script>
 </body>
 </html>
