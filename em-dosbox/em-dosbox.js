@@ -116,7 +116,7 @@ var Module = {
                 this.print('Changing to C: drive...');
                 this.FS.chdir('/CBL');
                 this.print('Current directory: C:\\');
-            } else if (program.toLowerCase() === 'start') {
+            } else if (program.toLowerCase() === 'start.bat') {
                 this.print('Starting CBL program...');
                 // Initialize the canvas for display
                 if (this.canvas) {
@@ -128,7 +128,7 @@ var Module = {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = '16px monospace';
                     ctx.fillText('CBL Program Initialized', 10, 30);
-                    ctx.fillText('Press any key to continue...', 10, 50);
+                    ctx.fillText('Loading START.BAT...', 10, 50);
                     
                     // Set up keyboard handler if not already set
                     if (!this.keyboardHandler) {
@@ -141,7 +141,7 @@ var Module = {
                             ctx.fillStyle = '#FFFFFF';
                             ctx.font = '16px monospace';
                             ctx.fillText('CBL Program Running', 10, 30);
-                            ctx.fillText('Loading START.BAT...', 10, 50);
+                            ctx.fillText('Press any key to continue...', 10, 50);
                             
                             // Remove the keyboard handler
                             this.canvas.removeEventListener('keydown', this.keyboardHandler);

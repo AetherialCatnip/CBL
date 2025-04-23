@@ -258,13 +258,15 @@
                                             Module.FS.writeFile('CBL.zip', new Uint8Array(data));
                                             console.log('[Debug] CBL.zip written to filesystem');
                                             
-                                            // Mount the filesystem
-                                            console.log('[Debug] Mounting filesystem...');
-                                            Module.FS.mount('ZIP', {
-                                                zip: 'CBL.zip',
-                                                mountpoint: '/'
-                                            });
-                                            console.log('[Debug] Filesystem mounted');
+                                            // Mount the filesystem only if not already mounted
+                                            if (!Module.FS.mounted) {
+                                                console.log('[Debug] Mounting filesystem...');
+                                                Module.FS.mount('ZIP', {
+                                                    zip: 'CBL.zip',
+                                                    mountpoint: '/'
+                                                });
+                                                console.log('[Debug] Filesystem mounted');
+                                            }
                                             
                                             debug('Filesystem mounted successfully');
                                             emulatorLoaded = true;
