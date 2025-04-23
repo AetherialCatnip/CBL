@@ -83,15 +83,42 @@ var Module = {
     execute: function(program) {
         console.log('[Module] Executing program:', program);
         try {
-            // Simulate program execution
-            this.print('Running ' + program + '...');
-            // In a real implementation, this would use Emscripten's runtime
-            // to execute the program. For now, we'll just simulate it.
-            setTimeout(() => {
-                this.print(program + ' execution complete');
-            }, 1000);
+            // Read the batch file contents
+            const batchContent = this.FS.readFile(program, { encoding: 'utf8' });
+            console.log('[Module] Batch file contents:', batchContent);
+            
+            // Split the batch file into commands
+            const commands = batchContent.split('\n').map(cmd => cmd.trim()).filter(cmd => cmd);
+            
+            // Execute each command
+            commands.forEach((command, index) => {
+                console.log('[Module] Executing command:', command);
+                this.print(command);
+                
+                // Simulate command execution with a delay
+                setTimeout(() => {
+                    if (command.toLowerCase().startsWith('echo')) {
+                        // Handle ECHO command
+                        const message = command.substring(5).trim();
+                        this.print(message);
+                    } else if (command.toLowerCase().startsWith('call')) {
+                        // Handle CALL command
+                        const program = command.substring(5).trim();
+                        this.print('Calling ' + program + '...');
+                    } else {
+                        // Handle other commands
+                        this.print('Executing: ' + command);
+                    }
+                    
+                    // If this is the last command, mark execution as complete
+                    if (index === commands.length - 1) {
+                        this.print(program + ' execution complete');
+                    }
+                }, index * 1000); // Add delay between commands
+            });
         } catch (error) {
             console.error('[Module] Execution error:', error);
+            this.print('Error executing ' + program + ': ' + error.message);
             throw error;
         }
     }
