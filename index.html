@@ -201,13 +201,17 @@
                     autolock: false,
                     onready: function() {
                         try {
-                            // Mount the filesystem only after the emulator is ready
-                            dosbox.fs.mount(dosbox.fs.filesystems.ZIP, {
-                                zip: 'CBL.zip',
-                                mountpoint: '/'
-                            });
-                            document.getElementById('status').textContent = 'Emulator ready';
-                            emulatorLoaded = true;
+                            // Mount the filesystem using the correct API
+                            if (typeof Module.FS !== 'undefined') {
+                                Module.FS.mount('ZIP', {
+                                    zip: 'CBL.zip',
+                                    mountpoint: '/'
+                                });
+                                document.getElementById('status').textContent = 'Emulator ready';
+                                emulatorLoaded = true;
+                            } else {
+                                throw new Error('Filesystem module not available');
+                            }
                         } catch (error) {
                             document.getElementById('status').textContent = 'Error mounting filesystem: ' + error;
                             console.error('Filesystem error:', error);
@@ -235,7 +239,7 @@
             try {
                 document.getElementById('status').textContent = 'Starting program...';
                 // Check if the filesystem is properly mounted
-                if (!dosbox.fs || !dosbox.fs.filesystems) {
+                if (typeof Module.FS === 'undefined' || !Module.FS.root) {
                     throw new Error('Filesystem not properly initialized');
                 }
                 dosbox.run('CBL.EXE');

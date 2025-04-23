@@ -21,9 +21,9 @@ var Module = {
     },
     // Initialize Emscripten filesystem
     FS: {
+        root: null,
         mount: function(type, options) {
             console.log('Mounting filesystem:', type, options);
-            // Create a basic filesystem structure
             if (!this.root) {
                 this.root = {
                     name: '/',
@@ -59,7 +59,7 @@ function Dosbox(options) {
     this.fs = {
         mount: function(type, options) {
             try {
-                // Mount the filesystem
+                // Mount the filesystem using Module.FS
                 Module.FS.mount(type, options);
                 console.log('Filesystem mounted successfully');
             } catch (error) {
@@ -77,6 +77,7 @@ function Dosbox(options) {
     this.run = function(program) {
         try {
             console.log('Running program:', program);
+            // Use Module.FS to handle file operations
             Module.FS.writeFile(program, new Uint8Array(0));
             Module.callMain([program]);
             this.onready();
