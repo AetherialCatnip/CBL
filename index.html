@@ -200,19 +200,23 @@
                     canvas: canvas,
                     autolock: false,
                     onready: function() {
-                        document.getElementById('status').textContent = 'Emulator ready';
-                        emulatorLoaded = true;
+                        try {
+                            // Mount the filesystem only after the emulator is ready
+                            dosbox.fs.mount(dosbox.fs.filesystems.ZIP, {
+                                zip: 'CBL.zip',
+                                mountpoint: '/'
+                            });
+                            document.getElementById('status').textContent = 'Emulator ready';
+                            emulatorLoaded = true;
+                        } catch (error) {
+                            document.getElementById('status').textContent = 'Error mounting filesystem: ' + error;
+                            console.error('Filesystem error:', error);
+                        }
                     },
                     onerror: function(error) {
                         document.getElementById('status').textContent = 'Error: ' + error;
                         console.error('Emulator error:', error);
                     }
-                });
-
-                // Mount the filesystem
-                dosbox.fs.mount(dosbox.fs.filesystems.ZIP, {
-                    zip: 'CBL.zip',
-                    mountpoint: '/'
                 });
 
             } catch (error) {
@@ -230,6 +234,10 @@
 
             try {
                 document.getElementById('status').textContent = 'Starting program...';
+                // Check if the filesystem is properly mounted
+                if (!dosbox.fs || !dosbox.fs.filesystems) {
+                    throw new Error('Filesystem not properly initialized');
+                }
                 dosbox.run('CBL.EXE');
             } catch (error) {
                 document.getElementById('status').textContent = 'Error starting program: ' + error;
@@ -240,16 +248,27 @@
         // Reset the program
         function resetProgram() {
             if (dosbox) {
-                dosbox.destroy();
-                document.getElementById('dosbox-container').innerHTML = '';
-                emulatorLoaded = false;
-                initializeEmulator();
+                try {
+                    dosbox.destroy();
+                    document.getElementById('dosbox-container').innerHTML = '';
+                    emulatorLoaded = false;
+                    initializeEmulator();
+                } catch (error) {
+                    document.getElementById('status').textContent = 'Error resetting emulator: ' + error;
+                    console.error('Reset error:', error);
+                }
             }
         }
 
         // Initialize when the page loads
         window.onload = function() {
-            initializeEmulator();
+            // Wait for the Module to be fully loaded
+            if (typeof Module !== 'undefined') {
+                initializeEmulator();
+            } else {
+                document.getElementById('status').textContent = 'Error: Em-DOSBox module not loaded';
+                console.error('Module not loaded');
+            }
         };
     </script>
 </body>
