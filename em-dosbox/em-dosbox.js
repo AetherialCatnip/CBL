@@ -83,12 +83,21 @@ var Module = {
     execute: function(program) {
         console.log('[Module] Executing program:', program);
         try {
-            // Read the batch file contents
-            const batchContent = this.FS.readFile(program, { encoding: 'utf8' });
+            // Read the batch file contents as binary data
+            const binaryData = this.FS.readFile(program);
+            console.log('[Module] Batch file binary data:', binaryData);
+            
+            // Convert binary data to string
+            const batchContent = new TextDecoder('utf-8').decode(binaryData);
             console.log('[Module] Batch file contents:', batchContent);
             
+            if (!batchContent) {
+                throw new Error('Batch file is empty');
+            }
+            
             // Split the batch file into commands
-            const commands = batchContent.split('\n').map(cmd => cmd.trim()).filter(cmd => cmd);
+            const commands = batchContent.split('\r\n').map(cmd => cmd.trim()).filter(cmd => cmd);
+            console.log('[Module] Commands to execute:', commands);
             
             // Execute each command
             commands.forEach((command, index) => {
