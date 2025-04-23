@@ -216,6 +216,8 @@
                                 });
                                 document.getElementById('status').textContent = 'Emulator ready';
                                 emulatorLoaded = true;
+                                // Enable the start button
+                                document.getElementById('startButton').disabled = false;
                             } else {
                                 throw new Error('Filesystem module not available');
                             }
@@ -229,6 +231,9 @@
                         console.error('Emulator error:', error);
                     }
                 });
+
+                // Disable the start button until ready
+                document.getElementById('startButton').disabled = true;
 
             } catch (error) {
                 document.getElementById('status').textContent = 'Error initializing emulator: ' + error;
@@ -277,7 +282,16 @@
         window.onload = function() {
             // Wait for the Module to be fully loaded
             if (typeof Module !== 'undefined') {
-                initializeEmulator();
+                // Set up Module ready handler
+                Module.onRuntimeInitialized = function() {
+                    console.log('Module runtime initialized');
+                    initializeEmulator();
+                };
+                
+                // If Module is already initialized
+                if (Module.ready) {
+                    initializeEmulator();
+                }
             } else {
                 document.getElementById('status').textContent = 'Error: Em-DOSBox module not loaded';
                 console.error('Module not loaded');

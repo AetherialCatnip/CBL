@@ -53,6 +53,15 @@ var Module = {
         if (this.FS && this.FS.root) {
             this.FS.root = null;
         }
+    },
+    // Add ready state handling
+    ready: false,
+    onRuntimeInitialized: function() {
+        console.log('Runtime initialized');
+        this.ready = true;
+        if (this.onReadyCallback) {
+            this.onReadyCallback();
+        }
     }
 };
 
@@ -64,6 +73,9 @@ function Dosbox(options) {
     this.autolock = options.autolock || false;
     this.onready = options.onready || function() {};
     this.onerror = options.onerror || function(error) { console.error(error); };
+    
+    // Set the canvas in Module
+    Module.canvas = this.canvas;
     
     // Initialize the filesystem
     this.fs = {
@@ -111,6 +123,12 @@ function Dosbox(options) {
             console.error('Error during cleanup:', error);
         }
     };
+
+    // Set up ready callback
+    Module.onReadyCallback = function() {
+        console.log('Module is ready');
+        this.onready();
+    }.bind(this);
 }
 
 // Export the Dosbox constructor
