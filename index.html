@@ -191,52 +191,66 @@
         let emulatorLoaded = false;
         let canvas;
 
+        // Debug function
+        function debug(message) {
+            console.log('[Debug] ' + message);
+            document.getElementById('status').textContent = message;
+        }
+
         // Initialize the emulator
         function initializeEmulator() {
             try {
+                debug('Starting emulator initialization...');
+                
                 // Remove existing canvas if it exists
                 const container = document.getElementById('dosbox-container');
                 container.innerHTML = '';
+                debug('Container cleared');
                 
                 // Create new canvas
                 canvas = document.createElement('canvas');
                 container.appendChild(canvas);
+                debug('Canvas created and added to container');
 
                 // Initialize the emulator
+                debug('Creating Dosbox instance...');
                 dosbox = new Module.Dosbox({
                     canvas: canvas,
                     autolock: false,
                     onready: function() {
                         try {
+                            debug('Dosbox ready, mounting filesystem...');
                             // Mount the filesystem using the correct API
                             if (typeof Module.FS !== 'undefined') {
                                 Module.FS.mount('ZIP', {
                                     zip: 'CBL.zip',
                                     mountpoint: '/'
                                 });
-                                document.getElementById('status').textContent = 'Emulator ready';
+                                debug('Filesystem mounted successfully');
                                 emulatorLoaded = true;
                                 // Enable the start button
                                 document.getElementById('startButton').disabled = false;
+                                debug('Emulator ready and start button enabled');
                             } else {
                                 throw new Error('Filesystem module not available');
                             }
                         } catch (error) {
-                            document.getElementById('status').textContent = 'Error mounting filesystem: ' + error;
+                            debug('Error mounting filesystem: ' + error);
                             console.error('Filesystem error:', error);
                         }
                     },
                     onerror: function(error) {
-                        document.getElementById('status').textContent = 'Error: ' + error;
+                        debug('Emulator error: ' + error);
                         console.error('Emulator error:', error);
                     }
                 });
 
                 // Disable the start button until ready
                 document.getElementById('startButton').disabled = true;
+                debug('Start button disabled until emulator is ready');
 
             } catch (error) {
-                document.getElementById('status').textContent = 'Error initializing emulator: ' + error;
+                debug('Error initializing emulator: ' + error);
                 console.error('Initialization error:', error);
             }
         }
@@ -244,19 +258,19 @@
         // Start the program
         function startProgram() {
             if (!emulatorLoaded) {
-                document.getElementById('status').textContent = 'Emulator is still loading. Please wait...';
+                debug('Emulator is still loading. Please wait...');
                 return;
             }
 
             try {
-                document.getElementById('status').textContent = 'Starting program...';
+                debug('Starting program...');
                 // Check if the filesystem is properly mounted
                 if (typeof Module.FS === 'undefined' || !Module.FS.root) {
                     throw new Error('Filesystem not properly initialized');
                 }
                 dosbox.run('CBL.EXE');
             } catch (error) {
-                document.getElementById('status').textContent = 'Error starting program: ' + error;
+                debug('Error starting program: ' + error);
                 console.error('Program start error:', error);
             }
         }
@@ -265,6 +279,7 @@
         function resetProgram() {
             if (dosbox) {
                 try {
+                    debug('Resetting emulator...');
                     // Clean up the existing emulator
                     dosbox.destroy();
                     // Reset state
@@ -272,7 +287,7 @@
                     // Reinitialize
                     initializeEmulator();
                 } catch (error) {
-                    document.getElementById('status').textContent = 'Error resetting emulator: ' + error;
+                    debug('Error resetting emulator: ' + error);
                     console.error('Reset error:', error);
                 }
             }
@@ -280,20 +295,23 @@
 
         // Initialize when the page loads
         window.onload = function() {
+            debug('Page loaded, checking Module...');
             // Wait for the Module to be fully loaded
             if (typeof Module !== 'undefined') {
+                debug('Module found, setting up initialization...');
                 // Set up Module ready handler
                 Module.onRuntimeInitialized = function() {
-                    console.log('Module runtime initialized');
+                    debug('Module runtime initialized');
                     initializeEmulator();
                 };
                 
                 // If Module is already initialized
                 if (Module.ready) {
+                    debug('Module already initialized, starting emulator...');
                     initializeEmulator();
                 }
             } else {
-                document.getElementById('status').textContent = 'Error: Em-DOSBox module not loaded';
+                debug('Error: Em-DOSBox module not loaded');
                 console.error('Module not loaded');
             }
         };

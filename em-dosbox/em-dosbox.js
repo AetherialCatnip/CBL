@@ -3,19 +3,21 @@ var Module = {
     preRun: [],
     postRun: [],
     print: function(text) {
-        console.log(text);
+        console.log('[Module] ' + text);
     },
     printErr: function(text) {
-        console.error(text);
+        console.error('[Module] ' + text);
     },
     canvas: null,
     setStatus: function(text) {
+        console.log('[Module] Status: ' + text);
         if (this.statusElement) {
             this.statusElement.innerHTML = text;
         }
     },
     totalDependencies: 0,
     monitorRunDependencies: function(left) {
+        console.log('[Module] Dependencies: ' + left + ' remaining');
         this.totalDependencies = Math.max(this.totalDependencies, left);
         this.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
     },
@@ -23,8 +25,9 @@ var Module = {
     FS: {
         root: null,
         mount: function(type, options) {
-            console.log('Mounting filesystem:', type, options);
+            console.log('[Module.FS] Mounting filesystem:', type, options);
             if (!this.root) {
+                console.log('[Module.FS] Creating root filesystem');
                 this.root = {
                     name: '/',
                     contents: {},
@@ -34,19 +37,19 @@ var Module = {
             return this.root;
         },
         mkdir: function(path) {
-            console.log('Creating directory:', path);
+            console.log('[Module.FS] Creating directory:', path);
         },
         writeFile: function(path, data) {
-            console.log('Writing file:', path, data);
+            console.log('[Module.FS] Writing file:', path, data);
         },
         readFile: function(path) {
-            console.log('Reading file:', path);
+            console.log('[Module.FS] Reading file:', path);
             return new Uint8Array(0);
         }
     },
     // Add cleanup function
     cleanup: function() {
-        console.log('Cleaning up emulator...');
+        console.log('[Module] Cleaning up emulator...');
         if (this.canvas) {
             this.canvas = null;
         }
@@ -57,9 +60,10 @@ var Module = {
     // Add ready state handling
     ready: false,
     onRuntimeInitialized: function() {
-        console.log('Runtime initialized');
+        console.log('[Module] Runtime initialized');
         this.ready = true;
         if (this.onReadyCallback) {
+            console.log('[Module] Calling ready callback');
             this.onReadyCallback();
         }
     }
@@ -69,6 +73,8 @@ Module.setStatus('Downloading...');
 
 // Initialize the emulator
 function Dosbox(options) {
+    console.log('[Dosbox] Initializing with options:', options);
+    
     this.canvas = options.canvas;
     this.autolock = options.autolock || false;
     this.onready = options.onready || function() {};
@@ -76,16 +82,18 @@ function Dosbox(options) {
     
     // Set the canvas in Module
     Module.canvas = this.canvas;
+    console.log('[Dosbox] Canvas set in Module');
     
     // Initialize the filesystem
     this.fs = {
         mount: function(type, options) {
             try {
+                console.log('[Dosbox.fs] Mounting filesystem:', type, options);
                 // Mount the filesystem using Module.FS
                 Module.FS.mount(type, options);
-                console.log('Filesystem mounted successfully');
+                console.log('[Dosbox.fs] Filesystem mounted successfully');
             } catch (error) {
-                console.error('Error mounting filesystem:', error);
+                console.error('[Dosbox.fs] Error mounting filesystem:', error);
                 throw error;
             }
         },
@@ -98,20 +106,20 @@ function Dosbox(options) {
     // Run a program
     this.run = function(program) {
         try {
-            console.log('Running program:', program);
+            console.log('[Dosbox] Running program:', program);
             // Use Module.FS to handle file operations
             Module.FS.writeFile(program, new Uint8Array(0));
             Module.callMain([program]);
             this.onready();
         } catch (error) {
-            console.error('Error running program:', error);
+            console.error('[Dosbox] Error running program:', error);
             this.onerror(error);
         }
     };
 
     // Destroy the emulator
     this.destroy = function() {
-        console.log('Destroying emulator');
+        console.log('[Dosbox] Destroying emulator');
         try {
             // Clean up the Module
             Module.cleanup();
@@ -120,16 +128,19 @@ function Dosbox(options) {
                 this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
             }
         } catch (error) {
-            console.error('Error during cleanup:', error);
+            console.error('[Dosbox] Error during cleanup:', error);
         }
     };
 
     // Set up ready callback
     Module.onReadyCallback = function() {
-        console.log('Module is ready');
+        console.log('[Dosbox] Module is ready, calling onready');
         this.onready();
     }.bind(this);
+
+    console.log('[Dosbox] Initialization complete');
 }
 
 // Export the Dosbox constructor
-Module.Dosbox = Dosbox; 
+Module.Dosbox = Dosbox;
+console.log('[Module] Dosbox constructor exported'); 
