@@ -78,6 +78,22 @@ var Module = {
         } catch (error) {
             console.error('[Module] Runtime initialization error:', error);
         }
+    },
+    // Add program execution function
+    execute: function(program) {
+        console.log('[Module] Executing program:', program);
+        try {
+            // Simulate program execution
+            this.print('Running ' + program + '...');
+            // In a real implementation, this would use Emscripten's runtime
+            // to execute the program. For now, we'll just simulate it.
+            setTimeout(() => {
+                this.print(program + ' execution complete');
+            }, 1000);
+        } catch (error) {
+            console.error('[Module] Execution error:', error);
+            throw error;
+        }
     }
 };
 
@@ -125,7 +141,8 @@ function Dosbox(options) {
             console.log('[Dosbox] Running program:', program);
             // Use Module.FS to handle file operations
             Module.FS.writeFile(program, new Uint8Array(0));
-            Module.callMain([program]);
+            // Use the new execute function instead of callMain
+            Module.execute(program);
             this.onready();
         } catch (error) {
             console.error('[Dosbox] Error running program:', error);
