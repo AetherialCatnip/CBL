@@ -45,6 +45,16 @@ var Module = {
         readFile: function(path) {
             console.log('[Module.FS] Reading file:', path);
             return new Uint8Array(0);
+        },
+        analyzePath: function(path) {
+            // Implementation of analyzePath method
+            return { exists: false }; // Placeholder return
+        },
+        unmount: function(mountpoint) {
+            // Implementation of unmount method
+        },
+        rmdir: function(path) {
+            // Implementation of rmdir method
         }
     },
     // Add cleanup function
@@ -83,12 +93,39 @@ var Module = {
     execute: function(program) {
         console.log('[Module] Executing program:', program);
         try {
-            // Read the batch file contents as binary data
-            const binaryData = this.FS.readFile(program);
-            console.log('[Module] Batch file binary data:', binaryData);
-            
+            // First check if the file exists in the ZIP
+            const zipPath = 'CBL.zip';
+            if (!this.FS.analyzePath(zipPath).exists) {
+                throw new Error('ZIP file not found');
+            }
+
+            // Read the ZIP file
+            const zipData = this.FS.readFile(zipPath);
+            console.log('[Module] ZIP file size:', zipData.length);
+
+            // Create a temporary directory for extraction
+            const tempDir = '/temp';
+            if (!this.FS.analyzePath(tempDir).exists) {
+                this.FS.mkdir(tempDir);
+            }
+
+            // Mount the ZIP file
+            this.FS.mount('ZIP', {
+                zip: zipData,
+                mountpoint: tempDir
+            });
+
+            // Read the batch file from the mounted ZIP
+            const batchPath = tempDir + '/' + program;
+            if (!this.FS.analyzePath(batchPath).exists) {
+                throw new Error('Batch file not found in ZIP: ' + program);
+            }
+
+            const batchData = this.FS.readFile(batchPath);
+            console.log('[Module] Batch file size:', batchData.length);
+
             // Convert binary data to string
-            const batchContent = new TextDecoder('utf-8').decode(binaryData);
+            const batchContent = new TextDecoder('utf-8').decode(batchData);
             console.log('[Module] Batch file contents:', batchContent);
             
             if (!batchContent) {
@@ -125,6 +162,10 @@ var Module = {
                     }
                 }, index * 1000); // Add delay between commands
             });
+
+            // Clean up
+            this.FS.unmount(tempDir);
+            this.FS.rmdir(tempDir);
         } catch (error) {
             console.error('[Module] Execution error:', error);
             this.print('Error executing ' + program + ': ' + error.message);
