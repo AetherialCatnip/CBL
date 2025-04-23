@@ -24,6 +24,7 @@ var Module = {
     // Initialize Emscripten filesystem
     FS: {
         root: null,
+        mounted: false,
         mount: function(type, options) {
             console.log('[Module.FS] Mounting filesystem:', type, options);
             if (!this.root) {
@@ -33,6 +34,10 @@ var Module = {
                     contents: {},
                     isDirectory: true
                 };
+            }
+            if (!this.mounted) {
+                this.mounted = true;
+                return this.root;
             }
             return this.root;
         },
@@ -99,11 +104,12 @@ var Module = {
             // Handle different DOS commands
             if (program.toLowerCase() === 'mount c /cbl') {
                 this.print('Mounting C: drive to /CBL...');
-                // Mount the CBL directory from the ZIP
-                this.FS.mount('ZIP', {
-                    zip: 'CBL.zip',
-                    mountpoint: '/CBL'
-                });
+                if (!this.FS.mounted) {
+                    this.FS.mount('ZIP', {
+                        zip: 'CBL.zip',
+                        mountpoint: '/CBL'
+                    });
+                }
                 this.print('C: drive mounted successfully');
             } else if (program.toLowerCase() === 'c:') {
                 this.print('Changing to C: drive...');
@@ -114,11 +120,14 @@ var Module = {
                 // Initialize the canvas for display
                 if (this.canvas) {
                     const ctx = this.canvas.getContext('2d');
+                    // Clear the canvas
                     ctx.fillStyle = '#000000';
                     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    // Draw the program interface
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = '16px monospace';
                     ctx.fillText('CBL Program Initialized', 10, 30);
+                    ctx.fillText('Press any key to continue...', 10, 50);
                 }
                 this.print('CBL program initialized');
             } else {

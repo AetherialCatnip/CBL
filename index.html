@@ -328,6 +328,8 @@
                     setTimeout(() => {
                         debug('Starting CBL program...');
                         dosbox.run('start');
+                        // Disable the start button after starting
+                        document.getElementById('startButton').disabled = true;
                     }, 500);
                 }, 500);
             } catch (error) {
@@ -347,6 +349,8 @@
                     emulatorLoaded = false;
                     // Reinitialize
                     initializeEmulator();
+                    // Re-enable the start button
+                    document.getElementById('startButton').disabled = false;
                 } catch (error) {
                     debug('Error resetting emulator: ' + error);
                     console.error('Reset error:', error);
