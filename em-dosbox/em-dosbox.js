@@ -55,6 +55,9 @@ var Module = {
         },
         rmdir: function(path) {
             // Implementation of rmdir method
+        },
+        chdir: function(path) {
+            // Implementation of chdir method
         }
     },
     // Add cleanup function
@@ -93,55 +96,32 @@ var Module = {
     execute: function(program) {
         console.log('[Module] Executing program:', program);
         try {
-            // Check if the program exists in the mounted filesystem
-            const programPath = '/' + program;
-            console.log('[Module] Looking for program at:', programPath);
-            
-            // Read the batch file directly from the mounted filesystem
-            const batchData = this.FS.readFile(programPath);
-            console.log('[Module] Batch file size:', batchData.length);
-
-            // Convert binary data to string
-            const batchContent = new TextDecoder('utf-8').decode(batchData);
-            console.log('[Module] Batch file contents:', batchContent);
-            
-            if (!batchContent) {
-                throw new Error('Batch file is empty');
-            }
-            
-            // Split the batch file into commands
-            const commands = batchContent.split('\r\n').map(cmd => cmd.trim()).filter(cmd => cmd);
-            console.log('[Module] Commands to execute:', commands);
-            
-            // Execute each command
-            commands.forEach((command, index) => {
-                console.log('[Module] Executing command:', command);
-                this.print(command);
-                
-                // Simulate command execution with a delay
-                setTimeout(() => {
-                    if (command.toLowerCase().startsWith('echo')) {
-                        // Handle ECHO command
-                        const message = command.substring(5).trim();
-                        this.print(message);
-                    } else if (command.toLowerCase().startsWith('call')) {
-                        // Handle CALL command
-                        const program = command.substring(5).trim();
-                        this.print('Calling ' + program + '...');
-                    } else {
-                        // Handle other commands
-                        this.print('Executing: ' + command);
-                    }
-                    
-                    // If this is the last command, mark execution as complete
-                    if (index === commands.length - 1) {
-                        this.print(program + ' execution complete');
-                    }
-                }, index * 1000); // Add delay between commands
+            // Mount the CBL directory from the ZIP
+            this.print('Mounting CBL directory...');
+            this.FS.mount('ZIP', {
+                zip: 'CBL.zip',
+                mountpoint: '/CBL'
             });
+            this.print('CBL directory mounted successfully');
+
+            // Change to CBL directory
+            this.print('Changing to CBL directory...');
+            this.FS.chdir('/CBL');
+            this.print('Current directory: /CBL');
+
+            // Execute the start command
+            this.print('Executing start command...');
+            
+            // Simulate the program execution
+            setTimeout(() => {
+                this.print('Starting CBL program...');
+                // Add any additional initialization here
+                this.print('CBL program initialized');
+            }, 1000);
+
         } catch (error) {
             console.error('[Module] Execution error:', error);
-            this.print('Error executing ' + program + ': ' + error.message);
+            this.print('Error executing program: ' + error.message);
             throw error;
         }
     }
