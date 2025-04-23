@@ -9,6 +9,7 @@ var Module = {
         console.error('[Module] ' + text);
     },
     canvas: null,
+    keyboardHandler: null,
     setStatus: function(text) {
         console.log('[Module] Status: ' + text);
         if (this.statusElement) {
@@ -128,6 +129,29 @@ var Module = {
                     ctx.font = '16px monospace';
                     ctx.fillText('CBL Program Initialized', 10, 30);
                     ctx.fillText('Press any key to continue...', 10, 50);
+                    
+                    // Set up keyboard handler if not already set
+                    if (!this.keyboardHandler) {
+                        this.keyboardHandler = function(event) {
+                            console.log('[Module] Key pressed:', event.key);
+                            // Clear the canvas
+                            ctx.fillStyle = '#000000';
+                            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                            // Draw the program interface
+                            ctx.fillStyle = '#FFFFFF';
+                            ctx.font = '16px monospace';
+                            ctx.fillText('CBL Program Running', 10, 30);
+                            ctx.fillText('Program is now active', 10, 50);
+                            // Remove the keyboard handler
+                            this.canvas.removeEventListener('keydown', this.keyboardHandler);
+                            this.keyboardHandler = null;
+                        }.bind(this);
+                        
+                        // Add keyboard event listener
+                        this.canvas.addEventListener('keydown', this.keyboardHandler);
+                        // Focus the canvas
+                        this.canvas.focus();
+                    }
                 }
                 this.print('CBL program initialized');
             } else {
