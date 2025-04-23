@@ -332,6 +332,8 @@
                         dosbox.run('start');
                         // Disable the start button after starting
                         document.getElementById('startButton').disabled = true;
+                        // Focus the canvas
+                        canvas.focus();
                     }, 500);
                 }, 500);
             } catch (error) {
