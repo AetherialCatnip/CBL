@@ -89,8 +89,12 @@ function Dosbox(options) {
     
     this.canvas = options.canvas;
     this.autolock = options.autolock || false;
-    this.onready = options.onready || function() {};
-    this.onerror = options.onerror || function(error) { console.error(error); };
+    this.onready = options.onready || function() {
+        console.log('[Dosbox] Default onready called');
+    };
+    this.onerror = options.onerror || function(error) {
+        console.error('[Dosbox] Default onerror called:', error);
+    };
     
     // Set the canvas in Module
     Module.canvas = this.canvas;
@@ -149,6 +153,10 @@ function Dosbox(options) {
         console.log('[Dosbox] Module is ready, calling onready');
         this.onready();
     }.bind(this);
+
+    // Call onready immediately to test
+    console.log('[Dosbox] Calling onready immediately');
+    this.onready();
 
     console.log('[Dosbox] Initialization complete');
 }

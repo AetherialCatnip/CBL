@@ -231,41 +231,58 @@
                     onready: function() {
                         try {
                             debug('Dosbox ready, mounting filesystem...');
+                            console.log('[Debug] Checking Module.FS:', Module.FS);
+                            
                             // Mount the filesystem using the correct API
                             if (typeof Module.FS !== 'undefined') {
+                                console.log('[Debug] Module.FS is defined, checking CBL.zip...');
                                 // First check if the ZIP file exists
                                 fetch('CBL.zip')
                                     .then(response => {
+                                        console.log('[Debug] Fetch response:', response);
                                         if (!response.ok) {
-                                            throw new Error('CBL.zip not found');
+                                            throw new Error('CBL.zip not found (HTTP ' + response.status + ')');
                                         }
                                         return response.arrayBuffer();
                                     })
                                     .then(data => {
+                                        console.log('[Debug] CBL.zip loaded, size:', data.byteLength);
                                         debug('CBL.zip found, mounting filesystem...');
-                                        // Create a virtual file with the ZIP data
-                                        Module.FS.writeFile('CBL.zip', new Uint8Array(data));
-                                        // Mount the filesystem
-                                        Module.FS.mount('ZIP', {
-                                            zip: 'CBL.zip',
-                                            mountpoint: '/'
-                                        });
-                                        debug('Filesystem mounted successfully');
-                                        emulatorLoaded = true;
-                                        // Enable the start button
-                                        document.getElementById('startButton').disabled = false;
-                                        debug('Emulator ready and start button enabled');
+                                        try {
+                                            // Create a virtual file with the ZIP data
+                                            console.log('[Debug] Writing CBL.zip to filesystem...');
+                                            Module.FS.writeFile('CBL.zip', new Uint8Array(data));
+                                            console.log('[Debug] CBL.zip written to filesystem');
+                                            
+                                            // Mount the filesystem
+                                            console.log('[Debug] Mounting filesystem...');
+                                            Module.FS.mount('ZIP', {
+                                                zip: 'CBL.zip',
+                                                mountpoint: '/'
+                                            });
+                                            console.log('[Debug] Filesystem mounted');
+                                            
+                                            debug('Filesystem mounted successfully');
+                                            emulatorLoaded = true;
+                                            // Enable the start button
+                                            document.getElementById('startButton').disabled = false;
+                                            debug('Emulator ready and start button enabled');
+                                        } catch (mountError) {
+                                            console.error('[Debug] Mount error:', mountError);
+                                            throw new Error('Error mounting filesystem: ' + mountError.message);
+                                        }
                                     })
                                     .catch(error => {
+                                        console.error('[Debug] ZIP file error:', error);
                                         debug('Error loading CBL.zip: ' + error);
-                                        console.error('ZIP file error:', error);
                                     });
                             } else {
+                                console.error('[Debug] Module.FS is undefined');
                                 throw new Error('Filesystem module not available');
                             }
                         } catch (error) {
+                            console.error('[Debug] Filesystem error:', error);
                             debug('Error mounting filesystem: ' + error);
-                            console.error('Filesystem error:', error);
                         }
                     },
                     onerror: function(error) {
