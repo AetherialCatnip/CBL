@@ -141,28 +141,28 @@ var Module = {
                             ctx.fillStyle = '#FFFFFF';
                             ctx.font = '16px monospace';
                             ctx.fillText('CBL Program Running', 10, 30);
-                            ctx.fillText('Loading STUDENT.EXE...', 10, 50);
+                            ctx.fillText('Loading START.BAT...', 10, 50);
                             
                             // Remove the keyboard handler
                             this.canvas.removeEventListener('keydown', this.keyboardHandler);
                             this.keyboardHandler = null;
                             
-                            // Execute STUDENT.EXE
+                            // Execute START.BAT
                             try {
-                                this.print('Executing STUDENT.EXE...');
+                                this.print('Executing START.BAT...');
                                 // Simulate program execution
                                 setTimeout(() => {
                                     ctx.fillStyle = '#000000';
                                     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                                     ctx.fillStyle = '#FFFFFF';
                                     ctx.font = '16px monospace';
-                                    ctx.fillText('STUDENT.EXE Running', 10, 30);
+                                    ctx.fillText('START.BAT Running', 10, 30);
                                     ctx.fillText('Program is now active', 10, 50);
                                     ctx.fillText('Use keyboard to interact', 10, 70);
                                 }, 1000);
                             } catch (error) {
-                                console.error('[Module] Error executing STUDENT.EXE:', error);
-                                this.print('Error executing STUDENT.EXE: ' + error.message);
+                                console.error('[Module] Error executing START.BAT:', error);
+                                this.print('Error executing START.BAT: ' + error.message);
                             }
                         }.bind(this);
                         
