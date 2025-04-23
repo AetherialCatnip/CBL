@@ -189,13 +189,20 @@
     <script>
         let dosbox;
         let emulatorLoaded = false;
+        let canvas;
 
         // Initialize the emulator
         function initializeEmulator() {
             try {
-                const canvas = document.createElement('canvas');
-                document.getElementById('dosbox-container').appendChild(canvas);
+                // Remove existing canvas if it exists
+                const container = document.getElementById('dosbox-container');
+                container.innerHTML = '';
+                
+                // Create new canvas
+                canvas = document.createElement('canvas');
+                container.appendChild(canvas);
 
+                // Initialize the emulator
                 dosbox = new Module.Dosbox({
                     canvas: canvas,
                     autolock: false,
@@ -253,9 +260,11 @@
         function resetProgram() {
             if (dosbox) {
                 try {
+                    // Clean up the existing emulator
                     dosbox.destroy();
-                    document.getElementById('dosbox-container').innerHTML = '';
+                    // Reset state
                     emulatorLoaded = false;
+                    // Reinitialize
                     initializeEmulator();
                 } catch (error) {
                     document.getElementById('status').textContent = 'Error resetting emulator: ' + error;

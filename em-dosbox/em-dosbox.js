@@ -43,6 +43,16 @@ var Module = {
             console.log('Reading file:', path);
             return new Uint8Array(0);
         }
+    },
+    // Add cleanup function
+    cleanup: function() {
+        console.log('Cleaning up emulator...');
+        if (this.canvas) {
+            this.canvas = null;
+        }
+        if (this.FS && this.FS.root) {
+            this.FS.root = null;
+        }
     }
 };
 
@@ -90,7 +100,16 @@ function Dosbox(options) {
     // Destroy the emulator
     this.destroy = function() {
         console.log('Destroying emulator');
-        Module._emscripten_force_exit();
+        try {
+            // Clean up the Module
+            Module.cleanup();
+            // Reset the canvas
+            if (this.canvas) {
+                this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        } catch (error) {
+            console.error('Error during cleanup:', error);
+        }
     };
 }
 
