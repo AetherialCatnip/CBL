@@ -233,15 +233,33 @@
                             debug('Dosbox ready, mounting filesystem...');
                             // Mount the filesystem using the correct API
                             if (typeof Module.FS !== 'undefined') {
-                                Module.FS.mount('ZIP', {
-                                    zip: 'CBL.zip',
-                                    mountpoint: '/'
-                                });
-                                debug('Filesystem mounted successfully');
-                                emulatorLoaded = true;
-                                // Enable the start button
-                                document.getElementById('startButton').disabled = false;
-                                debug('Emulator ready and start button enabled');
+                                // First check if the ZIP file exists
+                                fetch('CBL.zip')
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error('CBL.zip not found');
+                                        }
+                                        return response.arrayBuffer();
+                                    })
+                                    .then(data => {
+                                        debug('CBL.zip found, mounting filesystem...');
+                                        // Create a virtual file with the ZIP data
+                                        Module.FS.writeFile('CBL.zip', new Uint8Array(data));
+                                        // Mount the filesystem
+                                        Module.FS.mount('ZIP', {
+                                            zip: 'CBL.zip',
+                                            mountpoint: '/'
+                                        });
+                                        debug('Filesystem mounted successfully');
+                                        emulatorLoaded = true;
+                                        // Enable the start button
+                                        document.getElementById('startButton').disabled = false;
+                                        debug('Emulator ready and start button enabled');
+                                    })
+                                    .catch(error => {
+                                        debug('Error loading CBL.zip: ' + error);
+                                        console.error('ZIP file error:', error);
+                                    });
                             } else {
                                 throw new Error('Filesystem module not available');
                             }
