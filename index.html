@@ -316,14 +316,20 @@
                 if (typeof Module.FS === 'undefined' || !Module.FS.root) {
                     throw new Error('Filesystem not properly initialized');
                 }
-                // Instead of running START.BAT, we'll execute the DOS commands directly
+
+                // Execute the DOS commands in sequence
+                debug('Mounting C: drive...');
                 dosbox.run('mount c /CBL');
+                
                 setTimeout(() => {
+                    debug('Changing to C: drive...');
                     dosbox.run('c:');
+                    
                     setTimeout(() => {
+                        debug('Starting CBL program...');
                         dosbox.run('start');
-                    }, 1000);
-                }, 1000);
+                    }, 500);
+                }, 500);
             } catch (error) {
                 debug('Error starting program: ' + error);
                 console.error('Program start error:', error);

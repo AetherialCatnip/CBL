@@ -96,32 +96,37 @@ var Module = {
     execute: function(program) {
         console.log('[Module] Executing program:', program);
         try {
-            // Mount the CBL directory from the ZIP
-            this.print('Mounting CBL directory...');
-            this.FS.mount('ZIP', {
-                zip: 'CBL.zip',
-                mountpoint: '/CBL'
-            });
-            this.print('CBL directory mounted successfully');
-
-            // Change to CBL directory
-            this.print('Changing to CBL directory...');
-            this.FS.chdir('/CBL');
-            this.print('Current directory: /CBL');
-
-            // Execute the start command
-            this.print('Executing start command...');
-            
-            // Simulate the program execution
-            setTimeout(() => {
+            // Handle different DOS commands
+            if (program.toLowerCase() === 'mount c /cbl') {
+                this.print('Mounting C: drive to /CBL...');
+                // Mount the CBL directory from the ZIP
+                this.FS.mount('ZIP', {
+                    zip: 'CBL.zip',
+                    mountpoint: '/CBL'
+                });
+                this.print('C: drive mounted successfully');
+            } else if (program.toLowerCase() === 'c:') {
+                this.print('Changing to C: drive...');
+                this.FS.chdir('/CBL');
+                this.print('Current directory: C:\\');
+            } else if (program.toLowerCase() === 'start') {
                 this.print('Starting CBL program...');
-                // Add any additional initialization here
+                // Initialize the canvas for display
+                if (this.canvas) {
+                    const ctx = this.canvas.getContext('2d');
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = '16px monospace';
+                    ctx.fillText('CBL Program Initialized', 10, 30);
+                }
                 this.print('CBL program initialized');
-            }, 1000);
-
+            } else {
+                this.print('Unknown command: ' + program);
+            }
         } catch (error) {
             console.error('[Module] Execution error:', error);
-            this.print('Error executing program: ' + error.message);
+            this.print('Error executing command: ' + error.message);
             throw error;
         }
     }
