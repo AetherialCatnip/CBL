@@ -93,35 +93,12 @@ var Module = {
     execute: function(program) {
         console.log('[Module] Executing program:', program);
         try {
-            // First check if the file exists in the ZIP
-            const zipPath = 'CBL.zip';
-            if (!this.FS.analyzePath(zipPath).exists) {
-                throw new Error('ZIP file not found');
-            }
-
-            // Read the ZIP file
-            const zipData = this.FS.readFile(zipPath);
-            console.log('[Module] ZIP file size:', zipData.length);
-
-            // Create a temporary directory for extraction
-            const tempDir = '/temp';
-            if (!this.FS.analyzePath(tempDir).exists) {
-                this.FS.mkdir(tempDir);
-            }
-
-            // Mount the ZIP file
-            this.FS.mount('ZIP', {
-                zip: zipData,
-                mountpoint: tempDir
-            });
-
-            // Read the batch file from the mounted ZIP
-            const batchPath = tempDir + '/' + program;
-            if (!this.FS.analyzePath(batchPath).exists) {
-                throw new Error('Batch file not found in ZIP: ' + program);
-            }
-
-            const batchData = this.FS.readFile(batchPath);
+            // Check if the program exists in the mounted filesystem
+            const programPath = '/' + program;
+            console.log('[Module] Looking for program at:', programPath);
+            
+            // Read the batch file directly from the mounted filesystem
+            const batchData = this.FS.readFile(programPath);
             console.log('[Module] Batch file size:', batchData.length);
 
             // Convert binary data to string
@@ -162,10 +139,6 @@ var Module = {
                     }
                 }, index * 1000); // Add delay between commands
             });
-
-            // Clean up
-            this.FS.unmount(tempDir);
-            this.FS.rmdir(tempDir);
         } catch (error) {
             console.error('[Module] Execution error:', error);
             this.print('Error executing ' + program + ': ' + error.message);
