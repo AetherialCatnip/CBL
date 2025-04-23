@@ -202,6 +202,17 @@
             try {
                 debug('Starting emulator initialization...');
                 
+                // Check if Module is properly initialized
+                if (typeof Module === 'undefined') {
+                    throw new Error('Module not defined');
+                }
+                debug('Module is defined');
+                
+                if (!Module.Dosbox) {
+                    throw new Error('Dosbox constructor not found in Module');
+                }
+                debug('Dosbox constructor found');
+                
                 // Remove existing canvas if it exists
                 const container = document.getElementById('dosbox-container');
                 container.innerHTML = '';
@@ -309,6 +320,15 @@
                 if (Module.ready) {
                     debug('Module already initialized, starting emulator...');
                     initializeEmulator();
+                } else {
+                    debug('Waiting for Module runtime initialization...');
+                    // Add a timeout to check if initialization is stuck
+                    setTimeout(function() {
+                        if (!Module.ready) {
+                            debug('Warning: Module initialization seems stuck');
+                            console.warn('Module initialization timeout');
+                        }
+                    }, 5000);
                 }
             } else {
                 debug('Error: Em-DOSBox module not loaded');
