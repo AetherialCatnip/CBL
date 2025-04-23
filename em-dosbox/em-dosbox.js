@@ -128,49 +128,36 @@ var Module = {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = '16px monospace';
                     ctx.fillText('CBL Program Initialized', 10, 30);
-                    ctx.fillText('Loading START.BAT...', 10, 50);
+                    ctx.fillText('Press any key to start...', 10, 50);
                     
-                    // Set up keyboard handler if not already set
-                    if (!this.keyboardHandler) {
-                        this.keyboardHandler = function(event) {
-                            console.log('[Module] Key pressed:', event.key);
-                            // Clear the canvas
-                            ctx.fillStyle = '#000000';
-                            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                            // Draw the program interface
-                            ctx.fillStyle = '#FFFFFF';
-                            ctx.font = '16px monospace';
-                            ctx.fillText('CBL Program Running', 10, 30);
-                            ctx.fillText('Press any key to continue...', 10, 50);
-                            
-                            // Remove the keyboard handler
-                            this.canvas.removeEventListener('keydown', this.keyboardHandler);
-                            this.keyboardHandler = null;
-                            
-                            // Execute START.BAT
-                            try {
-                                this.print('Executing START.BAT...');
-                                // Simulate program execution
-                                setTimeout(() => {
-                                    ctx.fillStyle = '#000000';
-                                    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                                    ctx.fillStyle = '#FFFFFF';
-                                    ctx.font = '16px monospace';
-                                    ctx.fillText('START.BAT Running', 10, 30);
-                                    ctx.fillText('Program is now active', 10, 50);
-                                    ctx.fillText('Use keyboard to interact', 10, 70);
-                                }, 1000);
-                            } catch (error) {
-                                console.error('[Module] Error executing START.BAT:', error);
-                                this.print('Error executing START.BAT: ' + error.message);
-                            }
-                        }.bind(this);
-                        
-                        // Add keyboard event listener
-                        this.canvas.addEventListener('keydown', this.keyboardHandler);
-                        // Focus the canvas
-                        this.canvas.focus();
+                    // Remove any existing keyboard handler
+                    if (this.keyboardHandler) {
+                        this.canvas.removeEventListener('keydown', this.keyboardHandler);
+                        this.keyboardHandler = null;
                     }
+                    
+                    // Set up new keyboard handler
+                    this.keyboardHandler = (event) => {
+                        console.log('[Module] Key pressed:', event.key);
+                        event.preventDefault();
+                        
+                        // Update display
+                        ctx.fillStyle = '#000000';
+                        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.font = '16px monospace';
+                        ctx.fillText('CBL Program Running', 10, 30);
+                        ctx.fillText('Program is now active', 10, 50);
+                        
+                        // Remove this keyboard handler
+                        this.canvas.removeEventListener('keydown', this.keyboardHandler);
+                        this.keyboardHandler = null;
+                    };
+                    
+                    // Add keyboard event listener
+                    this.canvas.addEventListener('keydown', this.keyboardHandler);
+                    // Focus the canvas
+                    this.canvas.focus();
                 }
                 this.print('CBL program initialized');
             } else {
