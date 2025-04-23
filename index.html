@@ -314,7 +314,7 @@
                 if (typeof Module.FS === 'undefined' || !Module.FS.root) {
                     throw new Error('Filesystem not properly initialized');
                 }
-                dosbox.run('STUDENT.EXE');
+                dosbox.run('pharyngi.exe');
             } catch (error) {
                 debug('Error starting program: ' + error);
                 console.error('Program start error:', error);
