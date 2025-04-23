@@ -23,7 +23,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center;
         }
-        #screen {
+        #dosbox-container {
             margin: 20px 0;
             border: 1px solid #ccc;
         }
@@ -54,7 +54,7 @@
 <body>
     <div class="container">
         <h1>CBL Program Runner</h1>
-        <div id="screen"></div>
+        <div id="dosbox-container"></div>
         <div class="controls">
             <button onclick="startProgram()">Start Program</button>
             <button onclick="resetProgram()">Reset</button>
@@ -62,25 +62,23 @@
         <div id="status">Loading emulator...</div>
     </div>
 
-    <script src="https://copy.sh/v86/build/libv86.js"></script>
+    <script src="em-dosbox/em-dosbox.js"></script>
     <script>
         let emulator;
         let emulatorLoaded = false;
 
-        // Wait for the v86 library to load
+        // Wait for the Em-DOSBox to load
         window.addEventListener('load', function() {
-            // Check if the v86 library is available
-            if (typeof V86Starter === 'function') {
+            if (typeof Module !== 'undefined') {
                 document.getElementById('status').textContent = 'Emulator loaded. Click Start Program to begin.';
                 emulatorLoaded = true;
             } else {
                 document.getElementById('status').textContent = 'Error loading emulator.';
                 document.getElementById('status').className = 'error';
-                console.log('V86Starter type:', typeof V86Starter);
             }
         });
 
-        // Function to initialize and run v86
+        // Function to initialize and run Em-DOSBox
         function startProgram() {
             if (!emulatorLoaded) {
                 document.getElementById('status').textContent = 'Emulator is still loading. Please wait...';
@@ -95,38 +93,26 @@
             document.getElementById('status').textContent = 'Starting program...';
 
             try {
-                emulator = new V86Starter({
-                    screen_container: document.getElementById("screen"),
-                    bios: {
-                        url: "https://copy.sh/v86/build/seabios.bin"
+                emulator = new Module.Dosbox({
+                    canvas: document.getElementById("dosbox-container"),
+                    autolock: true,
+                    onready: function() {
+                        document.getElementById('status').textContent = 'Program started successfully.';
                     },
-                    vga_bios: {
-                        url: "https://copy.sh/v86/build/vgabios.bin"
-                    },
-                    cdrom: {
-                        url: "CBL.zip"
-                    },
-                    autostart: true,
-                    memory_size: 32 * 1024 * 1024,
-                    vga_memory_size: 8 * 1024 * 1024,
-                    filesystem: {
-                        basefs: "CBL.zip",
-                        baseurl: "./"
+                    onerror: function(error) {
+                        document.getElementById('status').textContent = 'Error: ' + error;
+                        document.getElementById('status').className = 'error';
                     }
                 });
 
-                emulator.add_listener("emulator-ready", function() {
-                    document.getElementById('status').textContent = 'Program started successfully.';
+                // Mount the CBL.zip file
+                emulator.fs.mount(emulator.fs.filesystems.ZIP, {
+                    zip: 'CBL.zip',
+                    mountpoint: '/'
                 });
 
-                emulator.add_listener("download-progress", function(e) {
-                    document.getElementById('status').textContent = 'Loading: ' + Math.round(e.progress * 100) + '%';
-                });
-
-                emulator.add_listener("download-error", function(e) {
-                    document.getElementById('status').textContent = 'Error loading program: ' + e;
-                    document.getElementById('status').className = 'error';
-                });
+                // Start the program
+                emulator.run('CBL.EXE');
             } catch (error) {
                 document.getElementById('status').textContent = 'Error starting program: ' + error.message;
                 document.getElementById('status').className = 'error';

@@ -1,53 +1,89 @@
 # CBL Program Runner
 
-This project runs a DOS program (CBL.zip) in the browser using Em-DOSBox.
+This project runs a DOS program in a web browser using Emscripten-compiled DOSBox.
 
-## Project Structure
+## Quick Start
+
+1. Visit https://aetherialcatnip.github.io/CBL/
+2. Click "Start Program" to run the DOS program
+3. Use "Reset" if needed
+
+## Setup Instructions (for developers)
+
+### Prerequisites
+
+1. Install Git for Windows: https://git-scm.com/download/win
+2. Install Python 3.x: https://www.python.org/downloads/
+3. Install CMake: https://cmake.org/download/
+
+### Automated Setup (Windows)
+
+1. Open Command Prompt as Administrator
+2. Navigate to the project directory
+3. Run the setup script:
+   ```batch
+   setup.bat
+   ```
+
+### Manual Setup
+
+1. Install Emscripten SDK:
+   ```batch
+   git clone https://github.com/emscripten-core/emsdk.git
+   cd emsdk
+   emsdk install latest
+   emsdk activate latest
+   call emsdk_env.bat
+   cd ..
+   ```
+
+2. Build DOSBox:
+   ```batch
+   git clone https://github.com/dosbox-staging/dosbox-staging.git
+   cd dosbox-staging
+   mkdir build
+   cd build
+   emcmake cmake ..
+   emmake make
+   cd ../..
+   ```
+
+3. Copy compiled files:
+   ```batch
+   copy dosbox-staging\build\dosbox.js em-dosbox\
+   copy dosbox-staging\build\dosbox.wasm em-dosbox\
+   ```
+
+### Project Structure
 
 ```
-.
-├── index.html              # Main web interface
-├── CBL.zip                 # The DOS program to run
-└── em-dosbox-em-dosbox-0.74/  # Em-DOSBox files
-    ├── em-dosbox.js        # Em-DOSBox JavaScript
-    ├── em-dosbox.wasm      # Em-DOSBox WebAssembly
-    └── ...                 # Other Em-DOSBox files
+CBL_Project/
+├── index.html          # Web interface
+├── CBL.zip            # DOS program
+├── em-dosbox/         # Compiled DOSBox files
+│   ├── dosbox.js      # JavaScript interface
+│   └── dosbox.wasm    # WebAssembly module
+├── setup.bat          # Setup script
+└── README.md          # Documentation
 ```
 
-## Setup Instructions
+### Deploying to GitHub Pages
 
-1. Make sure all files are in the correct locations:
-   - `index.html` in the root directory
-   - `CBL.zip` in the root directory
-   - Em-DOSBox files in the `em-dosbox-em-dosbox-0.74` directory
-
-2. For GitHub Pages:
-   - Push all files to your GitHub repository
-   - Enable GitHub Pages in your repository settings
-   - Select the main branch as the source
-
-## How It Works
-
-1. The web page loads Em-DOSBox, a JavaScript port of DOSBox
-2. Em-DOSBox mounts the current directory as drive C:
-3. The program automatically navigates to the CBL directory and runs STUDENT.EXE
-4. The DOS program runs in a canvas element on the webpage
-
-## Controls
-
-- **Start Program**: Starts or restarts the DOS program
-- **Reset**: Resets the emulator
-
-## Requirements
-
-- Modern web browser with WebAssembly support (Chrome, Firefox, Edge recommended)
-- Stable internet connection
-- GitHub Pages hosting
+1. Create a new GitHub repository
+2. Push all files to the repository
+3. Go to repository Settings > Pages
+4. Select the main branch as the source
+5. Wait for the site to be published
 
 ## Troubleshooting
 
-If the program doesn't start:
-1. Check that all files are in the correct locations
-2. Clear your browser cache
-3. Try a different browser
-4. Check the browser console for errors 
+If you encounter issues:
+
+1. Make sure all prerequisites are installed
+2. Run setup.bat as Administrator
+3. Check the browser console for errors
+4. Ensure your browser supports WebAssembly
+
+## License
+
+This project is licensed under the MIT License. 

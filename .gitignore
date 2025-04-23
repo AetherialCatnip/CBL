@@ -1,0 +1,19 @@
+# Build directories
+/build/
+/emsdk/
+/dosbox-staging/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db 
