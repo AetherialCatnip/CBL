@@ -99,51 +99,19 @@ var Module = {
         }
     },
     // Add program execution function
-    execute: function(program) {
-        console.log('[Module] Executing program:', program);
+    execute: function(command) {
+        console.log('[Module] Executing command:', command);
         try {
-            // Handle different DOS commands
-            if (program.toLowerCase() === 'mount c c:\\cbl') {
-                this.print('Mounting C: drive to C:\\CBL...');
-                if (!this.FS.mounted) {
-                    this.FS.mount('ZIP', {
-                        zip: 'CBL.zip',
-                        mountpoint: '/CBL'
-                    });
-                }
-                this.print('C: drive mounted successfully');
-            } else if (program.toLowerCase() === 'c:') {
-                this.print('Changing to C: drive...');
-                this.FS.chdir('/CBL');
-                this.print('Current directory: C:\\');
-            } else if (program.toLowerCase() === 'start') {
-                this.print('Starting CBL program...');
-                // Initialize the canvas for display
-                if (this.canvas) {
-                    const ctx = this.canvas.getContext('2d');
-                    // Clear the canvas
-                    ctx.fillStyle = '#000000';
-                    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                    // Draw the program interface
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.font = '16px monospace';
-                    ctx.fillText('CBL Program Initialized', 10, 30);
-                    ctx.fillText('Loading program...', 10, 50);
-                    
-                    // Simulate program execution
-                    setTimeout(() => {
-                        ctx.fillStyle = '#000000';
-                        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                        ctx.fillStyle = '#FFFFFF';
-                        ctx.font = '16px monospace';
-                        ctx.fillText('CBL Program Running', 10, 30);
-                        ctx.fillText('Program is now active', 10, 50);
-                        ctx.fillText('Use keyboard to interact', 10, 70);
-                    }, 1000);
-                }
-                this.print('CBL program started');
-            } else {
-                this.print('Unknown command: ' + program);
+            if (this.canvas) {
+                const ctx = this.canvas.getContext('2d');
+                // Clear the canvas
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                // Draw the command prompt
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '16px monospace';
+                ctx.fillText('C:\\> ' + command, 10, 30);
+                this.print('Command executed: ' + command);
             }
         } catch (error) {
             console.error('[Module] Execution error:', error);
@@ -177,9 +145,8 @@ function Dosbox(options) {
         mount: function(type, options) {
             try {
                 console.log('[Dosbox.fs] Mounting filesystem:', type, options);
-                // Mount the filesystem using Module.FS
                 Module.FS.mount(type, options);
-                console.log('[Dosbox.fs] Filesystems mounted successfully');
+                console.log('[Dosbox.fs] Filesystem mounted successfully');
             } catch (error) {
                 console.error('[Dosbox.fs] Error mounting filesystem:', error);
                 throw error;
@@ -191,17 +158,14 @@ function Dosbox(options) {
         }
     };
 
-    // Run a program
-    this.run = function(program) {
+    // Run a command
+    this.run = function(command) {
         try {
-            console.log('[Dosbox] Running program:', program);
-            // Use Module.FS to handle file operations
-            Module.FS.writeFile(program, new Uint8Array(0));
-            // Use the new execute function instead of callMain
-            Module.execute(program);
+            console.log('[Dosbox] Running command:', command);
+            Module.execute(command);
             this.onready();
         } catch (error) {
-            console.error('[Dosbox] Error running program:', error);
+            console.error('[Dosbox] Error running command:', error);
             this.onerror(error);
         }
     };
@@ -210,9 +174,7 @@ function Dosbox(options) {
     this.destroy = function() {
         console.log('[Dosbox] Destroying emulator');
         try {
-            // Clean up the Module
             Module.cleanup();
-            // Reset the canvas
             if (this.canvas) {
                 this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
             }

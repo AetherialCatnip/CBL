@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBL Project - DOS Emulator</title>
+    <title>DOSBox Emulator</title>
     <link rel="icon" href="data:,">
     <style>
         :root {
@@ -155,17 +155,17 @@
 <body>
     <div class="container">
         <header>
-            <h1>CBL Project</h1>
+            <h1>DOSBox Emulator</h1>
             <p class="description">
-                A web-based DOS emulator running the CBL program. This project uses Em-DOSBox to bring classic DOS applications to modern web browsers.
+                A web-based DOS emulator running in your browser.
             </p>
         </header>
 
         <div class="emulator-container">
             <div id="dosbox-container"></div>
             <div class="controls">
-                <button id="startButton" onclick="startProgram()">Start Program</button>
-                <button id="resetButton" onclick="resetProgram()">Reset</button>
+                <button id="startButton" onclick="startEmulator()">Start Emulator</button>
+                <button id="resetButton" onclick="resetEmulator()">Reset</button>
             </div>
             <div id="status">Initializing emulator...</div>
         </div>
@@ -173,15 +173,15 @@
         <div class="instructions">
             <h2>How to Use</h2>
             <ul>
-                <li>Click "Start Program" to begin running the CBL program</li>
+                <li>Click "Start Emulator" to begin</li>
                 <li>Use the "Reset" button to restart the emulator if needed</li>
-                <li>The program will run in the black box above</li>
-                <li>Keyboard input is supported for interacting with the program</li>
+                <li>The emulator will run in the black box above</li>
+                <li>Basic DOS commands are supported</li>
             </ul>
         </div>
 
         <footer>
-            <p>Powered by Em-DOSBox | CBL Project</p>
+            <p>Powered by Em-DOSBox</p>
         </footer>
     </div>
 
@@ -233,63 +233,9 @@
                     canvas: canvas,
                     autolock: false,
                     onready: function() {
-                        try {
-                            debug('Dosbox ready, mounting filesystem...');
-                            console.log('[Debug] Checking Module.FS:', Module.FS);
-                            
-                            // Mount the filesystem using the correct API
-                            if (typeof Module.FS !== 'undefined') {
-                                console.log('[Debug] Module.FS is defined, checking CBL.zip...');
-                                // First check if the ZIP file exists
-                                fetch('CBL.zip')
-                                    .then(response => {
-                                        console.log('[Debug] Fetch response:', response);
-                                        if (!response.ok) {
-                                            throw new Error('CBL.zip not found (HTTP ' + response.status + ')');
-                                        }
-                                        return response.arrayBuffer();
-                                    })
-                                    .then(data => {
-                                        console.log('[Debug] CBL.zip loaded, size:', data.byteLength);
-                                        debug('CBL.zip found, mounting filesystem...');
-                                        try {
-                                            // Create a virtual file with the ZIP data
-                                            console.log('[Debug] Writing CBL.zip to filesystem...');
-                                            Module.FS.writeFile('CBL.zip', new Uint8Array(data));
-                                            console.log('[Debug] CBL.zip written to filesystem');
-                                            
-                                            // Mount the filesystem only if not already mounted
-                                            if (!Module.FS.mounted) {
-                                                console.log('[Debug] Mounting filesystem...');
-                                                Module.FS.mount('ZIP', {
-                                                    zip: 'CBL.zip',
-                                                    mountpoint: '/'
-                                                });
-                                                console.log('[Debug] Filesystem mounted');
-                                            }
-                                            
-                                            debug('Filesystem mounted successfully');
-                                            emulatorLoaded = true;
-                                            // Enable the start button
-                                            document.getElementById('startButton').disabled = false;
-                                            debug('Emulator ready and start button enabled');
-                                        } catch (mountError) {
-                                            console.error('[Debug] Mount error:', mountError);
-                                            throw new Error('Error mounting filesystem: ' + mountError.message);
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('[Debug] ZIP file error:', error);
-                                        debug('Error loading CBL.zip: ' + error);
-                                    });
-                            } else {
-                                console.error('[Debug] Module.FS is undefined');
-                                throw new Error('Filesystem module not available');
-                            }
-                        } catch (error) {
-                            console.error('[Debug] Filesystem error:', error);
-                            debug('Error mounting filesystem: ' + error);
-                        }
+                        debug('Emulator ready');
+                        emulatorLoaded = true;
+                        document.getElementById('startButton').disabled = false;
                     },
                     onerror: function(error) {
                         debug('Emulator error: ' + error);
@@ -307,45 +253,29 @@
             }
         }
 
-        // Start the program
-        function startProgram() {
+        // Start the emulator
+        function startEmulator() {
             if (!emulatorLoaded) {
                 debug('Emulator is still loading. Please wait...');
                 return;
             }
 
             try {
-                debug('Starting program...');
-                // Check if the filesystem is properly mounted
-                if (typeof Module.FS === 'undefined' || !Module.FS.root) {
-                    throw new Error('Filesystem not properly initialized');
-                }
-
-                // Execute the DOS commands in sequence
-                debug('Mounting C: drive...');
-                dosbox.run('mount c c:\\cbl');
-                
-                setTimeout(() => {
-                    debug('Changing to C: drive...');
-                    dosbox.run('c:');
-                    
-                    setTimeout(() => {
-                        debug('Starting CBL program...');
-                        dosbox.run('start');
-                        // Disable the start button after starting
-                        document.getElementById('startButton').disabled = true;
-                        // Focus the canvas
-                        canvas.focus();
-                    }, 1000);
-                }, 1000);
+                debug('Starting emulator...');
+                // Run a test command
+                dosbox.run('dir');
+                // Disable the start button after starting
+                document.getElementById('startButton').disabled = true;
+                // Focus the canvas
+                canvas.focus();
             } catch (error) {
-                debug('Error starting program: ' + error);
-                console.error('Program start error:', error);
+                debug('Error starting emulator: ' + error);
+                console.error('Emulator start error:', error);
             }
         }
 
-        // Reset the program
-        function resetProgram() {
+        // Reset the emulator
+        function resetEmulator() {
             if (dosbox) {
                 try {
                     debug('Resetting emulator...');
