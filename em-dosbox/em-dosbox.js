@@ -128,7 +128,7 @@ var Module = {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = '16px monospace';
                     ctx.fillText('CBL Program Initialized', 10, 30);
-                    ctx.fillText('Press any key to start...', 10, 50);
+                    ctx.fillText('Loading START.BAT...', 10, 50);
                     
                     // Remove any existing keyboard handler
                     if (this.keyboardHandler) {
@@ -147,11 +147,29 @@ var Module = {
                         ctx.fillStyle = '#FFFFFF';
                         ctx.font = '16px monospace';
                         ctx.fillText('CBL Program Running', 10, 30);
-                        ctx.fillText('Program is now active', 10, 50);
+                        ctx.fillText('Starting student lesson1...', 10, 50);
                         
                         // Remove this keyboard handler
                         this.canvas.removeEventListener('keydown', this.keyboardHandler);
                         this.keyboardHandler = null;
+                        
+                        // Execute student lesson1
+                        try {
+                            this.print('Executing student lesson1...');
+                            // Simulate program execution
+                            setTimeout(() => {
+                                ctx.fillStyle = '#000000';
+                                ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                                ctx.fillStyle = '#FFFFFF';
+                                ctx.font = '16px monospace';
+                                ctx.fillText('Lesson 1 Running', 10, 30);
+                                ctx.fillText('Program is now active', 10, 50);
+                                ctx.fillText('Use keyboard to interact', 10, 70);
+                            }, 1000);
+                        } catch (error) {
+                            console.error('[Module] Error executing lesson1:', error);
+                            this.print('Error executing lesson1: ' + error.message);
+                        }
                     };
                     
                     // Add keyboard event listener
@@ -160,6 +178,22 @@ var Module = {
                     this.canvas.focus();
                 }
                 this.print('CBL program initialized');
+            } else if (program.toLowerCase() === 'student lesson1') {
+                this.print('Starting student lesson1...');
+                // Initialize the canvas for display
+                if (this.canvas) {
+                    const ctx = this.canvas.getContext('2d');
+                    // Clear the canvas
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    // Draw the program interface
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = '16px monospace';
+                    ctx.fillText('Lesson 1 Running', 10, 30);
+                    ctx.fillText('Program is now active', 10, 50);
+                    ctx.fillText('Use keyboard to interact', 10, 70);
+                }
+                this.print('Lesson 1 initialized');
             } else {
                 this.print('Unknown command: ' + program);
             }
