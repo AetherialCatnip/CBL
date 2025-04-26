@@ -181,11 +181,12 @@
         </div>
 
         <footer>
-            <p>Powered by Em-DOSBox</p>
+            <p>Powered by Em-DOSBox 0.74-3</p>
         </footer>
     </div>
 
-    <script src="em-dosbox/em-dosbox.js"></script>
+    <!-- Load the compiled DOSBox 0.74-3 files -->
+    <script src="em-dosbox/dosbox.js"></script>
     <script>
         let dosbox;
         let emulatorLoaded = false;
@@ -227,7 +228,7 @@
                 container.appendChild(canvas);
                 debug('Canvas created and added to container');
 
-                // Initialize the emulator
+                // Initialize the emulator with proper DOSBox configuration
                 debug('Creating Dosbox instance...');
                 dosbox = new Module.Dosbox({
                     canvas: canvas,
@@ -262,8 +263,19 @@
 
             try {
                 debug('Starting emulator...');
-                // Initialize the canvas display
-                Module.drawPrompt();
+                
+                // Mount the C: drive
+                dosbox.run('mount c c:\\cbl');
+                debug('Mounted C: drive');
+                
+                // Change to C: drive
+                dosbox.run('c:');
+                debug('Changed to C: drive');
+                
+                // Run the start command
+                dosbox.run('start');
+                debug('Started program');
+                
                 // Focus the canvas
                 canvas.focus();
                 // Disable the start button after starting
