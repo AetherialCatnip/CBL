@@ -323,7 +323,7 @@
 
                 // Execute the DOS commands in sequence
                 debug('Mounting C: drive...');
-                dosbox.run('mount c /CBL');
+                dosbox.run('mount c c:\\cbl');
                 
                 setTimeout(() => {
                     debug('Changing to C: drive...');
@@ -331,13 +331,13 @@
                     
                     setTimeout(() => {
                         debug('Starting CBL program...');
-                        dosbox.run('student lesson1');
+                        dosbox.run('start');
                         // Disable the start button after starting
                         document.getElementById('startButton').disabled = true;
                         // Focus the canvas
                         canvas.focus();
-                    }, 500);
-                }, 500);
+                    }, 1000);
+                }, 1000);
             } catch (error) {
                 debug('Error starting program: ' + error);
                 console.error('Program start error:', error);
