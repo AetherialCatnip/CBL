@@ -9,7 +9,9 @@ var Module = {
         console.error('[Module] ' + text);
     },
     canvas: null,
-    keyboardHandler: null,
+    currentCommand: '',
+    commandHistory: [],
+    cursorPosition: 0,
     setStatus: function(text) {
         console.log('[Module] Status: ' + text);
         if (this.statusElement) {
@@ -98,26 +100,73 @@ var Module = {
             console.error('[Module] Runtime initialization error:', error);
         }
     },
-    // Add program execution function
-    execute: function(command) {
-        console.log('[Module] Executing command:', command);
-        try {
-            if (this.canvas) {
-                const ctx = this.canvas.getContext('2d');
-                // Clear the canvas
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                // Draw the command prompt
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = '16px monospace';
-                ctx.fillText('C:\\> ' + command, 10, 30);
-                this.print('Command executed: ' + command);
+    // Handle keyboard input
+    handleKeyPress: function(event) {
+        if (!this.canvas) return;
+        
+        const ctx = this.canvas.getContext('2d');
+        const key = event.key;
+        
+        // Handle special keys
+        if (key === 'Enter') {
+            this.executeCommand(this.currentCommand);
+            this.currentCommand = '';
+            this.cursorPosition = 0;
+            this.drawPrompt();
+        } else if (key === 'Backspace') {
+            if (this.currentCommand.length > 0) {
+                this.currentCommand = this.currentCommand.slice(0, -1);
+                this.cursorPosition--;
+                this.drawPrompt();
             }
-        } catch (error) {
-            console.error('[Module] Execution error:', error);
-            this.print('Error executing command: ' + error.message);
-            throw error;
+        } else if (key.length === 1) {
+            this.currentCommand += key;
+            this.cursorPosition++;
+            this.drawPrompt();
         }
+    },
+    // Draw the command prompt
+    drawPrompt: function() {
+        if (!this.canvas) return;
+        
+        const ctx = this.canvas.getContext('2d');
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '16px monospace';
+        ctx.fillText('C:\\> ' + this.currentCommand, 10, 30);
+    },
+    // Execute a command
+    executeCommand: function(command) {
+        if (!this.canvas) return;
+        
+        const ctx = this.canvas.getContext('2d');
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '16px monospace';
+        ctx.fillText('C:\\> ' + command, 10, 30);
+        
+        // Handle basic DOS commands
+        if (command.toLowerCase() === 'dir') {
+            ctx.fillText('Directory of C:\\', 10, 50);
+            ctx.fillText('No files found', 10, 70);
+        } else if (command.toLowerCase() === 'cls') {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        } else if (command.toLowerCase() === 'help') {
+            ctx.fillText('Available commands:', 10, 50);
+            ctx.fillText('dir - List directory contents', 10, 70);
+            ctx.fillText('cls - Clear screen', 10, 90);
+            ctx.fillText('help - Show this help message', 10, 110);
+        } else {
+            ctx.fillText('Bad command or file name', 10, 50);
+        }
+        
+        this.commandHistory.push(command);
+        this.drawPrompt();
     }
 };
 
@@ -139,6 +188,11 @@ function Dosbox(options) {
     // Set the canvas in Module
     Module.canvas = this.canvas;
     console.log('[Dosbox] Canvas set in Module');
+    
+    // Add keyboard event listener
+    this.canvas.addEventListener('keydown', function(event) {
+        Module.handleKeyPress(event);
+    });
     
     // Initialize the filesystem
     this.fs = {
@@ -162,7 +216,7 @@ function Dosbox(options) {
     this.run = function(command) {
         try {
             console.log('[Dosbox] Running command:', command);
-            Module.execute(command);
+            Module.executeCommand(command);
             this.onready();
         } catch (error) {
             console.error('[Dosbox] Error running command:', error);

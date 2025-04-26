@@ -262,12 +262,13 @@
 
             try {
                 debug('Starting emulator...');
-                // Run a test command
-                dosbox.run('dir');
-                // Disable the start button after starting
-                document.getElementById('startButton').disabled = true;
+                // Initialize the canvas display
+                Module.drawPrompt();
                 // Focus the canvas
                 canvas.focus();
+                // Disable the start button after starting
+                document.getElementById('startButton').disabled = true;
+                debug('Emulator started and canvas focused');
             } catch (error) {
                 debug('Error starting emulator: ' + error);
                 console.error('Emulator start error:', error);
